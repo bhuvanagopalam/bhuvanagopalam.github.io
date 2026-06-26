@@ -1,0 +1,68 @@
+---
+import SkillIcon from "./SkillIcon.astro";
+import { skillGroups } from "../data/skills";
+
+const groupMeta: Record<
+  string,
+  {
+    tone: "blue" | "gold" | "green" | "rose" | "teal";
+  }
+> = {
+  "Programming Languages": {
+    tone: "teal",
+  },
+  "LLMs & Agents": {
+    tone: "blue",
+  },
+  "ML Frameworks": {
+    tone: "gold",
+  },
+  "Backend & APIs": {
+    tone: "green",
+  },
+  "Data & Infrastructure": {
+    tone: "rose",
+  },
+};
+---
+
+<section class="section skills-section" id="skills" aria-labelledby="skills-title">
+  <div class="container">
+    <div class="skills-heading">
+      <h2 id="skills-title">Skills</h2>
+      <span aria-hidden="true"></span>
+    </div>
+
+    <div class="skills-pattern" aria-label="Grouped technical skills">
+      {
+        skillGroups.map((group) => {
+          const meta = groupMeta[group.title];
+
+          return (
+            <article
+              class:list={[
+                "skill-row",
+                `skill-row--${meta.tone}`,
+              ]}
+            >
+              <div class="skill-row__title">
+                <h3>{group.title}</h3>
+              </div>
+
+              <ul class="skill-chip-list">
+                {
+                  group.skills.map((skill) => (
+                    <li class="skill-chip">
+                      <SkillIcon icon={skill.icon} />
+                      <span>{skill.name}</span>
+                    </li>
+                  ))
+                }
+              </ul>
+            </article>
+          );
+        })
+      }
+    </div>
+  </div>
+</section>

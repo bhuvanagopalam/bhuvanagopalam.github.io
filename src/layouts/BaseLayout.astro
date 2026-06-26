@@ -1,0 +1,129 @@
+---
+import TopNav from "../components/TopNav.astro";
+import { profile } from "../data/profile";
+import "../styles/global.css";
+
+type Props = {
+  title?: string;
+  seoTitle?: string;
+  description?: string;
+  image?: string;
+  canonical?: string;
+};
+
+const {
+  title = `${profile.name} | Portfolio`,
+  seoTitle = title,
+  description = profile.summary,
+  image = profile.photo,
+  canonical,
+} = Astro.props;
+
+const currentYear = new Date().getFullYear();
+const siteUrl = "https://rushendra10.github.io";
+const canonicalUrl = canonical ?? new URL(Astro.url.pathname, `${siteUrl}/`).toString();
+const imageUrl = image.startsWith("http") ? image : new URL(image, `${siteUrl}/`).toString();
+const analyticsId = "G-PFQ05X42W0";
+const keywords = [
+  "Rushendra Sidibomma",
+  "machine learning engineer",
+  "applied AI",
+  "LLM applications",
+  "agentic workflows",
+  "retrieval",
+  "trustworthy machine learning",
+];
+const personSchema = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: profile.name,
+  jobTitle: profile.role,
+  affiliation: {
+    "@type": "CollegeOrUniversity",
+    name: profile.affiliation,
+  },
+  url: siteUrl,
+  image: imageUrl,
+  email: profile.links.email.replace("mailto:", ""),
+  sameAs: [
+    profile.links.github,
+    profile.links.linkedin,
+    profile.links.scholar,
+  ],
+  description,
+};
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content={description} />
+    <meta name="author" content={profile.name} />
+    <meta name="keywords" content={keywords.join(", ")} />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="canonical" href={canonicalUrl} />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:site_name" content={profile.name} />
+    <meta property="og:title" content={seoTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content={imageUrl} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={seoTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:url" content={canonicalUrl} />
+    <meta name="twitter:image" content={imageUrl} />
+    <script type="application/ld+json" set:html={JSON.stringify(personSchema)}></script>
+    <script is:inline>
+      (() => {
+        const storageKey = "rushendra-theme";
+
+        try {
+          const storedTheme = localStorage.getItem(storageKey);
+          const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+          const theme = storedTheme || (prefersDark ? "dark" : "light");
+
+          document.documentElement.dataset.theme = theme;
+        } catch {
+          document.documentElement.dataset.theme = "light";
+        }
+      })();
+    </script>
+    {
+      import.meta.env.PROD && (
+        <>
+          <script async src={`https://www.googletagmanager.com/gtag/js?id=${analyticsId}`}></script>
+          <script is:inline>
+            {`
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag("js", new Date());
+              gtag("config", "${analyticsId}");
+            `}
+          </script>
+        </>
+      )
+    }
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div class="site-shell">
+      <TopNav />
+      <main id="main">
+        <slot />
+      </main>
+      <footer class="site-footer">
+        <div class="container">
+          <span>&copy; {currentYear} {profile.name}</span>
+          <a href={profile.links.email}>sidibomma.rushendra@gmail.com</a>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,80 @@
+---
+import { navigation, profile } from "../data/profile";
+---
+
+<header class="site-header">
+  <nav class="container nav" aria-label="Primary navigation">
+    <a class="brand" href="#main" aria-label={`${profile.name} home`}>
+      <span class="brand__name">{profile.name}</span>
+    </a>
+
+    <div class="nav__actions">
+      <div class="nav__links">
+        {
+          navigation.map((item) => (
+            <a
+              class:list={[
+                "nav__link",
+                item.label === "Resume" && "nav__link--primary",
+              ]}
+              href={item.href}
+              target={item.external ? "_blank" : undefined}
+              rel={item.external ? "noreferrer" : undefined}
+            >
+              {item.label}
+            </a>
+          ))
+        }
+      </div>
+
+      <button
+        class="theme-toggle"
+        type="button"
+        aria-label="Switch to dark theme"
+        aria-pressed="false"
+        data-theme-toggle
+      >
+        <span class="theme-toggle__icon" aria-hidden="true">
+          <svg class="theme-toggle__sun" viewBox="0 0 24 24" focusable="false">
+            <circle cx="12" cy="12" r="4.2"></circle>
+            <path d="M12 2.8v2.4M12 18.8v2.4M4.4 4.4l1.7 1.7M17.9 17.9l1.7 1.7M2.8 12h2.4M18.8 12h2.4M4.4 19.6l1.7-1.7M17.9 6.1l1.7-1.7"></path>
+          </svg>
+          <svg class="theme-toggle__moon" viewBox="0 0 24 24" focusable="false">
+            <path d="M20.5 14.6A7.4 7.4 0 0 1 9.4 3.5 8.4 8.4 0 1 0 20.5 14.6Z"></path>
+          </svg>
+        </span>
+      </button>
+    </div>
+  </nav>
+</header>
+
+<script is:inline>
+  (() => {
+    const storageKey = "rushendra-theme";
+    const toggle = document.querySelector("[data-theme-toggle]");
+
+    if (!(toggle instanceof HTMLButtonElement)) return;
+
+    const applyTheme = (theme) => {
+      document.documentElement.dataset.theme = theme;
+      toggle.setAttribute("aria-pressed", theme === "dark" ? "true" : "false");
+      toggle.setAttribute(
+        "aria-label",
+        theme === "dark" ? "Switch to light theme" : "Switch to dark theme",
+      );
+    };
+
+    applyTheme(document.documentElement.dataset.theme || "light");
+
+    toggle.addEventListener("click", () => {
+      const nextTheme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+      applyTheme(nextTheme);
+
+      try {
+        localStorage.setItem(storageKey, nextTheme);
+      } catch {
+        /* Theme preference is optional. */
+      }
+    });
+  })();
+</script>

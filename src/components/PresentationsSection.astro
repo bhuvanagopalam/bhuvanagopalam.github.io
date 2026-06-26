@@ -1,0 +1,33 @@
+---
+import { talks } from "../data/talks";
+---
+
+<section class="section compact-section" id="talks" aria-labelledby="talks-title">
+  <div class="container">
+    <div class="compact-heading">
+      <h2 id="talks-title">Presentations</h2>
+      <span aria-hidden="true"></span>
+    </div>
+
+    <div class="presentation-grid">
+      {
+        talks.map((talk) => (
+          <article class="presentation-card">
+            <div class="presentation-card__media">
+              <img src={talk.image} alt={talk.imageAlt} loading="lazy" />
+            </div>
+
+            <div class="presentation-card__body">
+              <span class="presentation-card__date">{talk.date}</span>
+              <h3>{talk.title}</h3>
+              <p class="presentation-card__meta">
+                {talk.venue} · {talk.location}
+              </p>
+              <p class="presentation-card__summary">{talk.summary}</p>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>

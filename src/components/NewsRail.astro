@@ -1,0 +1,76 @@
+---
+import { news } from "../data/news";
+---
+
+<aside class="news-float" aria-labelledby="latest-news-title">
+  <button class="news-float__label" type="button" data-news-open aria-label="Open news archive">
+    <span id="latest-news-title">News</span>
+  </button>
+
+  <dialog class="news-dialog" data-news-dialog aria-labelledby="news-dialog-title">
+    <div class="news-dialog__top">
+      <div>
+        <p class="news-dialog__eyebrow">News archive</p>
+        <h2 class="news-dialog__title" id="news-dialog-title">All Updates</h2>
+      </div>
+      <button class="news-dialog__close" type="button" data-news-close aria-label="Close news archive">
+        Close
+      </button>
+    </div>
+
+    <ul class="news-dialog__list">
+      {
+        news.map((item) => (
+          <li class="news-dialog__item">
+            <span class="news-item__date">{item.date}</span>
+            {
+              item.href ? (
+                <a class="news-item__title" href={item.href} target="_blank" rel="noreferrer">
+                  {item.title}
+                </a>
+              ) : (
+                <span class="news-item__title">{item.title}</span>
+              )
+            }
+            <p class="news-item__description">{item.description}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </dialog>
+</aside>
+
+<script>
+  const newsDialog = document.querySelector("[data-news-dialog]");
+
+  document.addEventListener("click", (event) => {
+    const eventTarget = event.target;
+    const target =
+      eventTarget instanceof Element
+        ? eventTarget
+        : eventTarget instanceof Node
+          ? eventTarget.parentElement
+          : null;
+
+    if (!target || !(newsDialog instanceof HTMLDialogElement)) {
+      return;
+    }
+
+    if (target.closest("[data-news-open]")) {
+      if (!newsDialog.open) {
+        newsDialog.showModal();
+      }
+      return;
+    }
+
+    if (target.closest("[data-news-close]") || target === newsDialog) {
+      newsDialog.close();
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && newsDialog instanceof HTMLDialogElement && newsDialog.open) {
+      newsDialog.close();
+    }
+  });
+</script>

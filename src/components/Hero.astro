@@ -1,0 +1,86 @@
+---
+import BrandIcon from "./BrandIcon.astro";
+import NewsRail from "./NewsRail.astro";
+import { education } from "../data/education";
+import { profile } from "../data/profile";
+
+const emailAddress = profile.links.email.replace("mailto:", "");
+
+const quickLinks = [
+  { label: "Resume", href: profile.links.resume, icon: "external", tone: "document", width: "half" },
+  { label: "CV", href: profile.links.cv, icon: "external", tone: "document", width: "half" },
+  { label: emailAddress, href: profile.links.email, icon: "email", tone: "email", width: "full" },
+  { label: "LinkedIn", href: profile.links.linkedin, icon: "linkedin", tone: "linkedin", width: "third" },
+  { label: "Scholar", href: profile.links.scholar, icon: "scholar", tone: "scholar", width: "third" },
+  { label: "GitHub", href: profile.links.github, icon: "github", tone: "github", width: "third" },
+];
+
+const heroEducation = education.slice(0, 2);
+
+const formatEducationPeriod = (item: (typeof education)[number]) =>
+  item.start ? `${item.start} - ${item.end}` : item.end;
+---
+
+<section class="hero container" aria-labelledby="hero-title">
+  <div class="hero__grid">
+    <div>
+      <h1 id="hero-title">Hi, I'm Rushendra!!</h1>
+      <p class="hero__lead">{profile.summary}</p>
+      <div class="hero__bio">
+        {profile.bio.map((paragraph) => <p>{paragraph}</p>)}
+      </div>
+
+      <div class="hero__status">
+        <span class="hero__status-dot" aria-hidden="true"></span>
+        <span>{profile.availability}</span>
+      </div>
+    </div>
+
+    <div class="hero__card">
+      <div class="portrait-card">
+        <div class="portrait-card__image">
+          <img src={profile.photo} alt={`Portrait of ${profile.name}`} loading="eager" />
+        </div>
+      </div>
+
+      <div class="quick-links" aria-label="Profile links">
+        {
+          quickLinks.map((item) => (
+            <a
+              class:list={[
+                "quick-link",
+                `quick-link--${item.width}`,
+                `quick-link--${item.tone}`,
+              ]}
+              href={item.href}
+              target={item.href.startsWith("mailto:") ? undefined : "_blank"}
+              rel={item.href.startsWith("mailto:") ? undefined : "noreferrer"}
+            >
+              <span class:list={["quick-link__icon", `quick-link__icon--${item.tone}`]} aria-hidden="true">
+                <BrandIcon name={item.icon} />
+              </span>
+              <span class="quick-link__label">{item.label}</span>
+            </a>
+          ))
+        }
+      </div>
+
+      <div class="credential-card" aria-label="Education">
+        <div class="credential-card__header">
+          <span>Education</span>
+        </div>
+        {
+          heroEducation.map((item) => (
+            <div class="credential-card__item">
+              <p class="credential-card__degree">{item.degree}</p>
+              <p class="credential-card__institution">{item.institution}</p>
+              <p class="credential-card__period">{formatEducationPeriod(item)}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+
+  <NewsRail />
+</section>

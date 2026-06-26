@@ -1,0 +1,74 @@
+---
+import {
+  siDjango,
+  siDocker,
+  siFastapi,
+  siGit,
+  siGnubash,
+  siGo,
+  siHuggingface,
+  siJavascript,
+  siLangchain,
+  siLinux,
+  siMongodb,
+  siMysql,
+  siNodedotjs,
+  siNvidia,
+  siOpenjdk,
+  siPostgresql,
+  siPython,
+  siPytorch,
+  siRedis,
+  siScikitlearn,
+} from "simple-icons";
+
+type Props = {
+  icon?: string;
+};
+
+const { icon } = Astro.props;
+
+const brandIcons = {
+  bash: siGnubash,
+  django: siDjango,
+  docker: siDocker,
+  fastapi: siFastapi,
+  git: siGit,
+  go: siGo,
+  huggingface: siHuggingface,
+  java: siOpenjdk,
+  javascript: siJavascript,
+  langchain: siLangchain,
+  linux: siLinux,
+  mongodb: siMongodb,
+  mysql: siMysql,
+  nodejs: siNodedotjs,
+  nvidia: siNvidia,
+  postgresql: siPostgresql,
+  python: siPython,
+  pytorch: siPytorch,
+  redis: siRedis,
+  scikitlearn: siScikitlearn,
+} as const;
+
+const brandIcon = icon ? brandIcons[icon as keyof typeof brandIcons] : undefined;
+---
+
+<span
+  class:list={["skill-chip__icon", brandIcon ? "skill-chip__icon--brand" : "skill-chip__icon--neutral"]}
+  style={brandIcon ? `--skill-logo-color: #${brandIcon.hex}` : undefined}
+>
+  {
+    brandIcon ? (
+      <svg class="skill-logo" viewBox="0 0 24 24" aria-hidden="true">
+        <path d={brandIcon.path}></path>
+      </svg>
+    ) : (
+      <svg class="skill-logo skill-logo--neutral" viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="5" y="5" width="14" height="14" rx="3"></rect>
+        <path d="M8.5 12h7"></path>
+        <path d="M12 8.5v7"></path>
+      </svg>
+    )
+  }
+</span>
