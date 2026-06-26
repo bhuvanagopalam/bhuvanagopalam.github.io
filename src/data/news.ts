@@ -1,4 +1,3 @@
-```ts
 export type NewsItem = {
   date: string;
   title: string;
@@ -62,4 +61,4 @@ export const news: NewsItem[] = [
       "Started my Bachelor of Technology in Data Science at Mahatma Gandhi Institute of Technology in Hyderabad, India.",
   },
 ];
-```
+
