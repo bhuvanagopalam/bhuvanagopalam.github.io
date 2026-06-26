@@ -1,24 +1,25 @@
+```js
 export const profile = {
-  name: "Rushendra Sidibomma",
-  role: "Machine Learning Researcher & Engineer",
+  name: "Bhuvana Gopalam",
+  role: "Machine Learning Engineer & Data Science Graduate Student",
   affiliation: "University of Minnesota Twin Cities",
   location: "Minneapolis, MN",
-  photo: "/images/Rushendra.jpg",
+  photo: "/images/Bhuvana.jpg",
   summary:
-    "I build applied AI systems that turn messy, unstructured information into dependable products and workflows.",
+    "I build machine learning and applied AI systems across computer vision, LLMs, medical imaging, data integration, and predictive analytics.",
   bio: [
-    "My strongest work sits at the intersection of LLM applications, agentic workflows, retrieval, evaluation, and backend systems. I care about the part after the demo: incomplete context, noisy data, latency constraints, and domain-specific failure modes.",
-    "Much of my experience has been in healthcare and biomedical AI, including document intelligence, medical imaging, and clinical workflow automation. That domain shaped how I engineer AI systems: clear abstractions, careful evaluation, reliable surrounding infrastructure, and enough domain understanding to be useful in practice.",
-    "Alongside production engineering, I bring 3+ years of research experience in computer vision, robustness, interpretability, and trustworthy ML. I like building AI systems that are ambitious, practical, and disciplined enough to survive real-world use.",
+    "I am currently pursuing a Master of Science in Data Science at the University of Minnesota Twin Cities, with coursework in Data Mining, Database Systems, Applied Regression, Multivariate Analysis, and Machine Learning.",
+    "My work focuses on practical AI systems that combine machine learning, deep learning, computer vision, NLP, and backend data infrastructure. I have built projects in bone fracture detection, visual question answering, airline delay prediction, semantic drug-review matching, and image forgery detection.",
+    "I have research experience in real-time violence detection, medical imaging, explainable AI, and trustworthy machine learning. I enjoy building AI systems that are accurate, interpretable, and useful for real-world applications.",
   ],
-  availability: "Open to ML, applied AI, and backend roles.",
+  availability:
+    "Open to machine learning, applied AI, data science, computer vision, NLP, and backend AI roles.",
   links: {
-    email: "mailto:sidibomma.rushendra@gmail.com",
-    github: "https://github.com/Rushendra10",
-    linkedin: "https://www.linkedin.com/in/rushendra-sidibomma",
-    scholar: "https://scholar.google.com/citations?user=z-6FN5YAAAAJ&hl=en",
-    resume: "/files/Rushendra_Sidibomma_Resume.pdf",
-    cv: "/files/Rushendra_Sidibomma_CV.pdf",
+    email: "mailto:gopalambhuvana@gmail.com",
+    github: "https://github.com/bhuvanagopalam",
+    linkedin: "https://www.linkedin.com/in/bhuvana-gopalam-20b559263/",
+    resume: "/files/Bhuvana_Gopalam_Resume.pdf",
+    cv: "",
   },
 };
 
@@ -26,6 +27,7 @@ export const navigation = [
   { label: "Skills", href: "#skills" },
   { label: "Experience", href: "#experience" },
   { label: "Projects", href: "#projects" },
-  { label: "Research", href: "#publications" },
-  { label: "Presentations", href: "#talks" },
+  { label: "Education", href: "#education" },
+  { label: "Certifications", href: "#certifications" },
 ];
+```
