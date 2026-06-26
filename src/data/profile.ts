@@ -1,4 +1,3 @@
-```js
 export const profile = {
   name: "Bhuvana Gopalam",
   role: "Machine Learning Engineer & Data Science Graduate Student",
@@ -30,4 +29,4 @@ export const navigation = [
   { label: "Education", href: "#education" },
   { label: "Certifications", href: "#certifications" },
 ];
-```
+
