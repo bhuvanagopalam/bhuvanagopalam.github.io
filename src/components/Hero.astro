@@ -7,12 +7,12 @@ import { profile } from "../data/profile";
 const emailAddress = profile.links.email.replace("mailto:", "");
 
 const quickLinks = [
-  { label: "Resume", href: profile.links.resume, icon: "external", tone: "document", width: "half" },
-  { label: "CV", href: profile.links.cv, icon: "external", tone: "document", width: "half" },
+  { label: "Resume", href: profile.links.resume, icon: "external", tone: "document", width: "full" },
+  { label: "CV", href: profile.links.cv, icon: "external", tone: "document", width: "full" },
   { label: emailAddress, href: profile.links.email, icon: "email", tone: "email", width: "full" },
-  { label: "LinkedIn", href: profile.links.linkedin, icon: "linkedin", tone: "linkedin", width: "third" },
-  { label: "Scholar", href: profile.links.scholar, icon: "scholar", tone: "scholar", width: "third" },
-  { label: "GitHub", href: profile.links.github, icon: "github", tone: "github", width: "third" },
+  { label: "LinkedIn", href: profile.links.linkedin, icon: "linkedin", tone: "linkedin", width: "half" },
+  { label: "Scholar", href: profile.links.scholar, icon: "scholar", tone: "scholar", width: "half" },
+  { label: "GitHub", href: profile.links.github, icon: "github", tone: "github", width: "half" },
 ].filter((item) => item.href);
 
 const heroEducation = education.slice(0, 2);
