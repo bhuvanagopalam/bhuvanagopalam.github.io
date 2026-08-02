@@ -13,7 +13,7 @@ const quickLinks = [
   { label: "LinkedIn", href: profile.links.linkedin, icon: "linkedin", tone: "linkedin", width: "third" },
   { label: "Scholar", href: profile.links.scholar, icon: "scholar", tone: "scholar", width: "third" },
   { label: "GitHub", href: profile.links.github, icon: "github", tone: "github", width: "third" },
-];
+].filter((item) => item.href);
 
 const heroEducation = education.slice(0, 2);
 
@@ -24,7 +24,7 @@ const formatEducationPeriod = (item: (typeof education)[number]) =>
 <section class="hero container" aria-labelledby="hero-title">
   <div class="hero__grid">
     <div>
-      <h1 id="hero-title">Hi, I'm Rushendra!!</h1>
+      <h1 id="hero-title">Hi, I'm {profile.name.split(" ")[0]}!</h1>
       <p class="hero__lead">{profile.summary}</p>
       <div class="hero__bio">
         {profile.bio.map((paragraph) => <p>{paragraph}</p>)}

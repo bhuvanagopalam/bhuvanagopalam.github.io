@@ -20,12 +20,12 @@ const {
 } = Astro.props;
 
 const currentYear = new Date().getFullYear();
-const siteUrl = "https://rushendra10.github.io";
+const siteUrl = "https://bhuvanagopalam.github.io";
 const canonicalUrl = canonical ?? new URL(Astro.url.pathname, `${siteUrl}/`).toString();
 const imageUrl = image.startsWith("http") ? image : new URL(image, `${siteUrl}/`).toString();
-const analyticsId = "G-PFQ05X42W0";
+const analyticsId = "";
 const keywords = [
-  "Rushendra Sidibomma",
+  profile.name,
   "machine learning engineer",
   "applied AI",
   "LLM applications",
@@ -80,7 +80,7 @@ const personSchema = {
     <script type="application/ld+json" set:html={JSON.stringify(personSchema)}></script>
     <script is:inline>
       (() => {
-        const storageKey = "rushendra-theme";
+        const storageKey = "site-theme";
 
         try {
           const storedTheme = localStorage.getItem(storageKey);
@@ -94,7 +94,7 @@ const personSchema = {
       })();
     </script>
     {
-      import.meta.env.PROD && (
+      import.meta.env.PROD && analyticsId && (
         <>
           <script async src={`https://www.googletagmanager.com/gtag/js?id=${analyticsId}`}></script>
           <script is:inline>
@@ -121,7 +121,7 @@ const personSchema = {
       <footer class="site-footer">
         <div class="container">
           <span>&copy; {currentYear} {profile.name}</span>
-          <a href={profile.links.email}>sidibomma.rushendra@gmail.com</a>
+          <a href={profile.links.email}>{profile.links.email.replace("mailto:", "")}</a>
         </div>
       </footer>
     </div>

@@ -96,5 +96,3 @@ export const projects: Project[] = [
     tags: ["PyTorch", "OpenCV", "FFmpeg", "GStreamer", "TensorRT", "Streamlit", "Action Recognition"],
   },
 ];
-
-```links: [{ label: "GitHub", href: "your-project-link" }]```

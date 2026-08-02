@@ -1,7 +1,6 @@
 ---
 import ExperienceSection from "../components/ExperienceSection.astro";
 import Hero from "../components/Hero.astro";
-import PresentationsSection from "../components/PresentationsSection.astro";
 import ProjectsSection from "../components/ProjectsSection.astro";
 import ResearchOutputsSection from "../components/ResearchOutputsSection.astro";
 import SkillsSection from "../components/SkillsSection.astro";
@@ -10,7 +9,7 @@ import { profile } from "../data/profile";
 ---
 
 <BaseLayout
-  title="Rushendra"
+  title={profile.name}
   seoTitle={`${profile.name} | Applied AI and Machine Learning`}
   description={profile.summary}
 >
@@ -23,6 +22,4 @@ import { profile } from "../data/profile";
   <ProjectsSection />
 
   <ResearchOutputsSection />
-
-  <PresentationsSection />
 </BaseLayout>

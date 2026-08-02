@@ -2,26 +2,34 @@
 import SkillIcon from "./SkillIcon.astro";
 import { skillGroups } from "../data/skills";
 
-const groupMeta: Record<
-  string,
-  {
-    tone: "blue" | "gold" | "green" | "rose" | "teal";
-  }
-> = {
+type Tone = "blue" | "gold" | "green" | "rose" | "teal";
+
+const tones: Tone[] = ["teal", "blue", "gold", "green", "rose"];
+
+const groupMeta: Record<string, { tone: Tone }> = {
   "Programming Languages": {
     tone: "teal",
   },
-  "LLMs & Agents": {
+  "Machine Learning & AI": {
     tone: "blue",
   },
   "ML Frameworks": {
     tone: "gold",
   },
-  "Backend & APIs": {
+  "LLMs & Applied AI": {
     tone: "green",
   },
-  "Data & Infrastructure": {
+  "Data Science Libraries": {
     tone: "rose",
+  },
+  "Computer Vision Tools": {
+    tone: "teal",
+  },
+  "Backend, Data & Infrastructure": {
+    tone: "blue",
+  },
+  "Tools & Analytics": {
+    tone: "gold",
   },
 };
 ---
@@ -35,8 +43,8 @@ const groupMeta: Record<
 
     <div class="skills-pattern" aria-label="Grouped technical skills">
       {
-        skillGroups.map((group) => {
-          const meta = groupMeta[group.title];
+        skillGroups.map((group, index) => {
+          const meta = groupMeta[group.title] ?? { tone: tones[index % tones.length] };
 
           return (
             <article

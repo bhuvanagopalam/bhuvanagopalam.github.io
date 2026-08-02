@@ -3,7 +3,7 @@ export const profile = {
   role: "Machine Learning Engineer & Data Science Graduate Student",
   affiliation: "University of Minnesota Twin Cities",
   location: "Minneapolis, MN",
-  photo: "/images/Bhuvana.jpg",
+  photo: "/images/Bhuvana_profile.jpg",
   summary:
     "I build machine learning and applied AI systems across computer vision, LLMs, medical imaging, data integration, and predictive analytics.",
   bio: [
@@ -17,8 +17,9 @@ export const profile = {
     email: "mailto:gopalambhuvana@gmail.com",
     github: "https://github.com/bhuvanagopalam",
     linkedin: "https://www.linkedin.com/in/bhuvana-gopalam-20b559263/",
-    resume: "/files/Bhuvana_Gopalam_Resume.pdf",
+    resume: "/files/BhuvanaGopalamResumeCS.pdf",
     cv: "",
+    scholar: "",
   },
 };
 
@@ -26,7 +27,5 @@ export const navigation = [
   { label: "Skills", href: "#skills" },
   { label: "Experience", href: "#experience" },
   { label: "Projects", href: "#projects" },
-  { label: "Education", href: "#education" },
-  { label: "Certifications", href: "#certifications" },
 ];
 
