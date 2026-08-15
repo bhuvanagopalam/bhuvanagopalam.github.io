@@ -1,5 +1,6 @@
 ---
 import BrandIcon from "./BrandIcon.astro";
+import GopherPeek from "./GopherPeek.astro";
 import NewsRail from "./NewsRail.astro";
 import { education } from "../data/education";
 import { profile } from "../data/profile";
@@ -43,6 +44,8 @@ const formatEducationPeriod = (item: (typeof education)[number]) =>
     </div>
 
     <div class="hero__card">
+      <GopherPeek />
+
       <div class="portrait-card">
         <div class="portrait-card__image">
           <img src={profile.photo} alt={`Portrait of ${profile.name}`} loading="eager" />
