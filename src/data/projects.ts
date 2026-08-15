@@ -24,6 +24,7 @@ export const projects: Project[] = [
       "Used Grad-CAM interpretability analysis to inspect model attention and study alignment with clinically annotated fracture regions.",
     ],
     tags: ["PyTorch", "Object Detection", "Medical Imaging", "Faster R-CNN", "RetinaNet", "Grad-CAM"],
+    links: [{ label: "GitHub", href: "https://github.com/bhuvanagopalam/Bone-Fracture-Detection" }],
   },
   {
     title: "Self-Questioning Visual Question Answering System",
@@ -38,6 +39,7 @@ export const projects: Project[] = [
       "Achieved 90% detection accuracy with zero false positives on the evaluation set.",
     ],
     tags: ["PyTorch", "Transformers", "OFA", "Qwen2-VL", "Gradio", "llama.cpp", "Computer Vision"],
+    links: [{ label: "GitHub", href: "https://github.com/bhuvanagopalam/SQVQA" }],
   },
   {
     title: "Airline Delay Risk Prediction",
