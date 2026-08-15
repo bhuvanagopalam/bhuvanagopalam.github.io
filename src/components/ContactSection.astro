@@ -1,8 +1,9 @@
 ---
 import BrandIcon from "./BrandIcon.astro";
-import { profile } from "../data/profile";
+import { contactForm, profile } from "../data/profile";
 
 const emailAddress = profile.links.email.replace("mailto:", "");
+const accessKey = contactForm.web3formsAccessKey;
 
 const contactLinks = [
   {
@@ -77,8 +78,11 @@ const contactLinks = [
       <div class="contact-form-card">
         <h3 class="contact-form-card__title">Send a message</h3>
         <p class="contact-form-card__note">
-          This opens your email app with everything filled in — nothing is sent from this
-          page, so you can review before hitting send.
+          {
+            accessKey
+              ? "Sent straight to my inbox — I usually reply within a day or two."
+              : "This opens your email app with everything filled in, so you can review before hitting send."
+          }
         </p>
 
         <form class="contact-form" data-contact-form>
@@ -119,39 +123,118 @@ const contactLinks = [
               required></textarea>
           </div>
 
-          <button class="contact-form__submit" type="submit">
+          {/* Honeypot: bots fill hidden fields, humans never see this one. */}
+          <input
+            class="contact-form__honeypot"
+            type="checkbox"
+            name="botcheck"
+            tabindex="-1"
+            autocomplete="off"
+          />
+
+          <button class="contact-form__submit" type="submit" data-form-submit>
             Send Message
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <line x1="22" y1="2" x2="11" y2="13" />
               <polygon points="22 2 15 22 11 13 2 9 22 2" />
             </svg>
           </button>
+
+          <p class="contact-form__status" data-form-status role="status" aria-live="polite"></p>
         </form>
       </div>
     </div>
   </div>
 </section>
 
-<script is:inline define:vars={{ recipient: emailAddress }}>
+<script is:inline define:vars={{ recipient: emailAddress, accessKey }}>
   (() => {
     const form = document.querySelector("[data-contact-form]");
     if (!(form instanceof HTMLFormElement)) return;
 
-    form.addEventListener("submit", (event) => {
-      event.preventDefault();
+    const button = form.querySelector("[data-form-submit]");
+    const status = form.querySelector("[data-form-status]");
 
+    const readFields = () => {
       const data = new FormData(form);
-      const name = String(data.get("name") || "").trim();
-      const email = String(data.get("email") || "").trim();
-      const subject = String(data.get("subject") || "").trim();
-      const message = String(data.get("message") || "").trim();
+      return {
+        name: String(data.get("name") || "").trim(),
+        email: String(data.get("email") || "").trim(),
+        subject: String(data.get("subject") || "").trim(),
+        message: String(data.get("message") || "").trim(),
+        botcheck: data.get("botcheck"),
+      };
+    };
 
+    const setStatus = (text, tone) => {
+      if (!status) return;
+      status.textContent = text;
+      status.dataset.tone = tone || "";
+    };
+
+    // Without an access key configured there is no backend to post to, so hand
+    // off to the visitor's mail client rather than pretending the send worked.
+    const openMailClient = ({ name, email, subject, message }) => {
       const finalSubject = subject || `Portfolio enquiry from ${name}`;
       const body = `${message}\n\n---\nFrom: ${name}\nReply to: ${email}`;
-
       window.location.href = `mailto:${recipient}?subject=${encodeURIComponent(
         finalSubject,
       )}&body=${encodeURIComponent(body)}`;
+    };
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const fields = readFields();
+
+      if (!accessKey) {
+        openMailClient(fields);
+        return;
+      }
+
+      // Silently accept-and-drop anything that trips the honeypot.
+      if (fields.botcheck) {
+        setStatus("Thanks - your message has been sent.", "success");
+        form.reset();
+        return;
+      }
+
+      if (button) button.disabled = true;
+      setStatus("Sending...", "pending");
+
+      try {
+        const response = await fetch("https://api.web3forms.com/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify({
+            access_key: accessKey,
+            subject: fields.subject || `Portfolio enquiry from ${fields.name}`,
+            from_name: "Portfolio contact form",
+            name: fields.name,
+            email: fields.email,
+            message: fields.message,
+          }),
+        });
+
+        const result = await response.json().catch(() => ({}));
+
+        // Only report success when the API actually confirms it.
+        if (response.ok && result.success) {
+          setStatus("Thanks - your message has been sent. I'll reply soon.", "success");
+          form.reset();
+        } else {
+          setStatus(
+            `Something went wrong, so the message was not sent. Please email me directly at ${recipient}.`,
+            "error",
+          );
+        }
+      } catch {
+        setStatus(
+          `Could not reach the server, so the message was not sent. Please email me directly at ${recipient}.`,
+          "error",
+        );
+      } finally {
+        if (button) button.disabled = false;
+      }
     });
   })();
 </script>

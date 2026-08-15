@@ -31,6 +31,14 @@ export const profile = {
   },
 };
 
+// Web3Forms access key for the contact form. This key is designed to be public
+// and client-side, so it is safe to commit. Get one (free) by entering your
+// email at https://web3forms.com - they send the key straight back to you.
+// While this is empty the form falls back to opening the visitor's mail app.
+export const contactForm = {
+  web3formsAccessKey: "",
+};
+
 export const navigation = [
   { label: "Skills", href: "#skills" },
   { label: "Experience", href: "#experience" },
