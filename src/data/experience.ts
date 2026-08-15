@@ -14,6 +14,22 @@ export type ExperienceItem = {
 
 export const experience: ExperienceItem[] = [
   {
+    title: "Research Assistant - Hopkins Big Data Project",
+    organization: "University of Minnesota - Twin Cities",
+    category: "Research",
+    location: "Minneapolis, MN",
+    start: "Summer 2026",
+    end: "Present",
+    summary:
+      "Building data pipelines and interpretable machine learning models over large multi-source administrative datasets for student outcome prediction.",
+    details: [
+      "Designed and implemented data processing pipelines in Python to ingest, clean, and integrate large multi-source administrative datasets (attendance, grades, health, and discipline records) for downstream analysis.",
+      "Engineered reusable ETL and feature-construction modules handling missing data, schema normalization, and student-level outcome definitions, improving data quality and pipeline reliability.",
+      "Built and benchmarked interpretable machine learning models using scalable, testable code to identify risk factors and compare modeling approaches for outcome prediction.",
+    ],
+    tags: ["Python", "ETL", "Pandas", "Feature Engineering", "Interpretable ML"],
+  },
+  {
     title: "Undergraduate Research Assistant - Realtime Violence Detection",
     organization: "Mahatma Gandhi Institute of Technology",
     category: "Research",
