@@ -108,7 +108,9 @@ const personSchema = {
         </>
       )
     }
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- ?v= busts the browser favicon cache, which otherwise survives a hard
+         refresh and keeps serving the previous icon. Bump it if the icon changes. -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=2" />
     <title>{title}</title>
   </head>
   <body>
