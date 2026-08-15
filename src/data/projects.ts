@@ -8,6 +8,8 @@ export type Project = {
     label: string;
     href: string;
   }>;
+  // When set, the card title links through to a full write-up page.
+  detailHref?: string;
 };
 
 export const projects: Project[] = [
@@ -40,6 +42,7 @@ export const projects: Project[] = [
     ],
     tags: ["PyTorch", "Transformers", "OFA", "Qwen2-VL", "Gradio", "llama.cpp", "Computer Vision"],
     links: [{ label: "GitHub", href: "https://github.com/bhuvanagopalam/SQVQA" }],
+    detailHref: "/projects/sqvqa/",
   },
   {
     title: "Airline Delay Risk Prediction",

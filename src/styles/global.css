@@ -2350,6 +2350,391 @@ main {
 }
 
 /* ---------------------------------------------------------------------------
+   Project card - link through to a write-up
+   --------------------------------------------------------------------------- */
+
+.project-card__title-link {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  color: inherit;
+  transition: color 0.18s ease;
+}
+
+.project-card__title-link:hover,
+.project-card__title-link:focus-visible {
+  color: var(--accent-strong);
+}
+
+.project-card__title-arrow {
+  display: inline-flex;
+  transition: transform 0.18s ease;
+}
+
+.project-card__title-arrow svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.project-card__title-link:hover .project-card__title-arrow,
+.project-card__title-link:focus-visible .project-card__title-arrow {
+  transform: translateX(3px);
+}
+
+.project-card__walkthrough {
+  display: inline-block;
+  margin-top: 12px;
+  border-bottom: 1px solid rgba(15, 95, 92, 0.35);
+  padding-bottom: 1px;
+  color: var(--accent-strong);
+  font-size: 0.88rem;
+  font-weight: 750;
+}
+
+.project-card__walkthrough:hover,
+.project-card__walkthrough:focus-visible {
+  border-bottom-color: var(--accent);
+}
+
+/* ---------------------------------------------------------------------------
+   Project detail page
+   --------------------------------------------------------------------------- */
+
+.project-detail {
+  padding: 40px 0 8px;
+}
+
+.project-detail__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 26px;
+  color: var(--muted);
+  font-size: 0.89rem;
+  font-weight: 700;
+  transition: color 0.18s ease;
+}
+
+.project-detail__back:hover,
+.project-detail__back:focus-visible {
+  color: var(--accent-strong);
+}
+
+.project-detail__back svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.project-detail__title {
+  max-width: 900px;
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(2.1rem, 4.6vw, 3.4rem);
+  line-height: 1.05;
+  font-weight: 850;
+}
+
+.project-detail__summary {
+  max-width: 680px;
+  margin: 18px 0 0;
+  color: var(--muted);
+  font-size: 1.06rem;
+  line-height: 1.62;
+}
+
+.project-detail__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.project-detail__tags li {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  padding: 5px 13px;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.project-detail__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.project-detail__links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--accent-strong);
+  border-radius: var(--radius);
+  background: var(--accent);
+  padding: 10px 18px;
+  color: #fffdf8;
+  font-size: 0.9rem;
+  font-weight: 750;
+  transition: background 0.18s ease;
+}
+
+.project-detail__links a:hover,
+.project-detail__links a:focus-visible {
+  background: var(--accent-strong);
+}
+
+.project-detail__links svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.project-detail__highlights {
+  display: grid;
+  gap: 14px;
+  max-width: 820px;
+  margin: 30px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.project-detail__highlights li {
+  position: relative;
+  padding-left: 26px;
+  color: var(--muted);
+  font-size: 0.99rem;
+  line-height: 1.62;
+}
+
+.project-detail__highlights li::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 0.62em;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--accent);
+}
+
+/* ---------------------------------------------------------------------------
+   SQVQA pipeline walkthrough
+   --------------------------------------------------------------------------- */
+
+.pipeline-intro {
+  max-width: 620px;
+  margin: 20px 0 0;
+  color: var(--muted);
+  font-size: 1.04rem;
+  line-height: 1.65;
+}
+
+.pipeline {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.8fr) minmax(0, 1.2fr);
+  gap: 44px;
+  align-items: start;
+  margin-top: 34px;
+}
+
+.pipeline-input {
+  position: sticky;
+  top: 108px;
+  margin: 0;
+}
+
+.pipeline-input img {
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.pipeline-input figcaption {
+  margin-top: 10px;
+  color: var(--faint);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.pipeline-stages {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pipeline-stage {
+  position: relative;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: 18px;
+  padding: 0 0 26px;
+  opacity: 0.32;
+  transform: translateY(6px);
+  transition:
+    opacity 0.45s ease,
+    transform 0.45s ease;
+}
+
+.pipeline-stage.is-active {
+  opacity: 1;
+  transform: none;
+}
+
+/* Connector running between the stage markers. */
+.pipeline-stage:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  left: 19px;
+  top: 38px;
+  bottom: 4px;
+  width: 2px;
+  background: var(--line);
+}
+
+.pipeline-stage.is-active:not(:last-child)::before {
+  background: linear-gradient(180deg, var(--accent), var(--line));
+}
+
+.pipeline-stage__marker {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--faint);
+  font-size: 0.92rem;
+  font-weight: 800;
+  transition:
+    border-color 0.45s ease,
+    background 0.45s ease,
+    color 0.45s ease;
+}
+
+.pipeline-stage.is-active .pipeline-stage__marker {
+  border-color: var(--accent);
+  background: rgba(15, 95, 92, 0.1);
+  color: var(--accent-strong);
+}
+
+.pipeline-stage__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.pipeline-stage__content h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1.12rem;
+  font-weight: 800;
+}
+
+.pipeline-stage__model {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 3px 10px;
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.pipeline-stage.is-active .pipeline-stage__model {
+  border-color: rgba(15, 95, 92, 0.28);
+  color: var(--accent-strong);
+}
+
+.pipeline-stage__content p {
+  margin: 0;
+  max-width: 560px;
+  color: var(--muted);
+  font-size: 0.97rem;
+  line-height: 1.62;
+}
+
+.pipeline-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.pipeline-result {
+  margin: 0;
+  border: 1px solid rgba(15, 95, 92, 0.2);
+  border-radius: var(--radius);
+  background: rgba(15, 95, 92, 0.06);
+  padding: 12px 18px;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.pipeline-result strong {
+  color: var(--accent-strong);
+  font-weight: 800;
+}
+
+.pipeline-replay {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 10px 16px;
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    color 0.18s ease;
+}
+
+.pipeline-replay:hover,
+.pipeline-replay:focus-visible {
+  border-color: var(--accent);
+  color: var(--accent-strong);
+}
+
+.pipeline-replay svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ---------------------------------------------------------------------------
    Contact section
    --------------------------------------------------------------------------- */
 
@@ -2676,6 +3061,15 @@ main {
    --------------------------------------------------------------------------- */
 
 @media (max-width: 900px) {
+  .pipeline {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+  }
+
+  .pipeline-input {
+    position: static;
+  }
+
   .contact-grid {
     grid-template-columns: minmax(0, 1fr);
     gap: 32px;
@@ -2701,7 +3095,44 @@ main {
   }
 }
 
+:root[data-theme="dark"] .project-detail__tags li,
+:root[data-theme="dark"] .project-detail__links a {
+  border-color: rgba(67, 78, 71, 0.7);
+}
+
+:root[data-theme="dark"] .project-detail__links a {
+  border-color: rgba(164, 226, 218, 0.5);
+  color: #0d1412;
+}
+
+:root[data-theme="dark"] .pipeline-input img,
+:root[data-theme="dark"] .pipeline-stage__marker,
+:root[data-theme="dark"] .pipeline-stage__model,
+:root[data-theme="dark"] .pipeline-replay {
+  border-color: rgba(67, 78, 71, 0.7);
+}
+
+:root[data-theme="dark"] .pipeline-stage.is-active .pipeline-stage__marker {
+  border-color: rgba(98, 200, 188, 0.5);
+  background: rgba(98, 200, 188, 0.13);
+}
+
+:root[data-theme="dark"] .pipeline-stage.is-active .pipeline-stage__model {
+  border-color: rgba(98, 200, 188, 0.3);
+}
+
+:root[data-theme="dark"] .pipeline-result {
+  border-color: rgba(98, 200, 188, 0.24);
+  background: rgba(98, 200, 188, 0.08);
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .pipeline-stage {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
   .hero__role-text::after {
     animation: none;
   }

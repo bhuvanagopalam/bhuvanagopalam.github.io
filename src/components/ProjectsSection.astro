@@ -14,8 +14,29 @@ import { projects } from "../data/projects";
         projects.map((project) => (
           <article class="project-card">
             <div class="project-card__content">
-              <h3>{project.title}</h3>
+              <h3>
+                {
+                  project.detailHref ? (
+                    <a class="project-card__title-link" href={project.detailHref}>
+                      {project.title}
+                      <span class="project-card__title-arrow" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" focusable="false">
+                          <line x1="5" y1="12" x2="19" y2="12" />
+                          <polyline points="12 5 19 12 12 19" />
+                        </svg>
+                      </span>
+                    </a>
+                  ) : (
+                    project.title
+                  )
+                }
+              </h3>
               <p>{project.summary}</p>
+              {project.detailHref && (
+                <a class="project-card__walkthrough" href={project.detailHref}>
+                  Read the walkthrough
+                </a>
+              )}
             </div>
 
             <div class="project-card__stack">

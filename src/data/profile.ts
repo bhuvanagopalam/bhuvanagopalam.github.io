@@ -39,10 +39,12 @@ export const contactForm = {
   web3formsAccessKey: "a9d43133-918f-4234-a7a0-672c44074feb",
 };
 
+// Root-relative rather than bare hashes so these still resolve from project
+// detail pages, not just the home page.
 export const navigation = [
-  { label: "Skills", href: "#skills" },
-  { label: "Experience", href: "#experience" },
-  { label: "Projects", href: "#projects" },
-  { label: "Contact", href: "#contact" },
+  { label: "Skills", href: "/#skills" },
+  { label: "Experience", href: "/#experience" },
+  { label: "Projects", href: "/#projects" },
+  { label: "Contact", href: "/#contact" },
 ];
 
