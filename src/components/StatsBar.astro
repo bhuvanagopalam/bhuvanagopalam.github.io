@@ -1,0 +1,91 @@
+---
+import { certifications } from "../data/certifications";
+import { experience } from "../data/experience";
+import { projects } from "../data/projects";
+import { skillGroups } from "../data/skills";
+
+// Every figure is derived from the data files so the bar can never drift out of
+// sync with the rest of the site.
+const toolCount = skillGroups.reduce((total, group) => total + group.skills.length, 0);
+
+const plural = (count: number, singular: string, suffix = "s") =>
+  count === 1 ? singular : `${singular}${suffix}`;
+
+const stats = [
+  { value: projects.length, label: plural(projects.length, "Project") + " Built" },
+  { value: toolCount, label: "Tools & Technologies" },
+  { value: certifications.length, label: plural(certifications.length, "Certification") },
+  { value: experience.length, label: plural(experience.length, "Research Role") },
+];
+---
+
+<section class="stats-bar" aria-label="Portfolio at a glance">
+  <div class="container stats-bar__inner">
+    {
+      stats.map((stat) => (
+        <div class="stat">
+          <span class="stat__num" data-stat-value={stat.value}>
+            {stat.value}
+          </span>
+          <span class="stat__label">{stat.label}</span>
+        </div>
+      ))
+    }
+  </div>
+</section>
+
+<script is:inline>
+  (() => {
+    const nums = document.querySelectorAll("[data-stat-value]");
+    if (!nums.length) return;
+
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion || typeof IntersectionObserver === "undefined") return;
+
+    const countUp = (el) => {
+      const target = Number(el.dataset.statValue);
+      if (!Number.isFinite(target) || target <= 0) return;
+
+      const duration = 900;
+      const start = performance.now();
+      let settled = false;
+
+      const settle = () => {
+        if (settled) return;
+        settled = true;
+        el.textContent = String(target);
+      };
+
+      const tick = (now) => {
+        if (settled) return;
+        const progress = Math.min((now - start) / duration, 1);
+        // easeOutCubic keeps the count brisk at first, then settles.
+        const eased = 1 - Math.pow(1 - progress, 3);
+        el.textContent = String(Math.round(target * eased));
+        if (progress < 1) requestAnimationFrame(tick);
+        else settle();
+      };
+
+      // requestAnimationFrame is paused outright while a tab is not compositing,
+      // which would otherwise strand a partial (wrong) number on screen. Timers
+      // still fire when throttled, so this guarantees the real figure lands.
+      setTimeout(settle, duration + 400);
+
+      el.textContent = "0";
+      requestAnimationFrame(tick);
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          countUp(entry.target);
+          observer.unobserve(entry.target);
+        });
+      },
+      { threshold: 0.6 },
+    );
+
+    nums.forEach((el) => observer.observe(el));
+  })();
+</script>

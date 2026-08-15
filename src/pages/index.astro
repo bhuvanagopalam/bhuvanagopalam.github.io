@@ -1,9 +1,11 @@
 ---
+import ContactSection from "../components/ContactSection.astro";
 import ExperienceSection from "../components/ExperienceSection.astro";
 import Hero from "../components/Hero.astro";
 import ProjectsSection from "../components/ProjectsSection.astro";
 import ResearchOutputsSection from "../components/ResearchOutputsSection.astro";
 import SkillsSection from "../components/SkillsSection.astro";
+import StatsBar from "../components/StatsBar.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { profile } from "../data/profile";
 ---
@@ -15,6 +17,8 @@ import { profile } from "../data/profile";
 >
   <Hero />
 
+  <StatsBar />
+
   <SkillsSection />
 
   <ExperienceSection />
@@ -22,4 +26,6 @@ import { profile } from "../data/profile";
   <ProjectsSection />
 
   <ResearchOutputsSection />
+
+  <ContactSection />
 </BaseLayout>

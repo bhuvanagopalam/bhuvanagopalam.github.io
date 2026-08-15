@@ -1,6 +1,14 @@
 export const profile = {
   name: "Bhuvana Gopalam",
   role: "Machine Learning Engineer & Data Science Graduate Student",
+  // Cycled by the typewriter effect in the hero. Edit freely - the first entry
+  // is what renders before JS loads and for reduced-motion visitors.
+  roles: [
+    "Applied AI/ML Engineer",
+    "Computer Vision Engineer",
+    "Vision-Language Systems Builder",
+    "Data Science Graduate Student",
+  ],
   affiliation: "University of Minnesota Twin Cities",
   location: "Minneapolis, MN",
   photo: "/images/Bhuvana_profile.jpg",
@@ -27,5 +35,6 @@ export const navigation = [
   { label: "Skills", href: "#skills" },
   { label: "Experience", href: "#experience" },
   { label: "Projects", href: "#projects" },
+  { label: "Contact", href: "#contact" },
 ];
 

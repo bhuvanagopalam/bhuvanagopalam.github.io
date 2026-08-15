@@ -1,0 +1,157 @@
+---
+import BrandIcon from "./BrandIcon.astro";
+import { profile } from "../data/profile";
+
+const emailAddress = profile.links.email.replace("mailto:", "");
+
+const contactLinks = [
+  {
+    label: "Email",
+    value: emailAddress,
+    href: profile.links.email,
+    icon: "email",
+    tone: "email",
+  },
+  {
+    label: "GitHub",
+    value: profile.links.github.replace("https://", ""),
+    href: profile.links.github,
+    icon: "github",
+    tone: "github",
+  },
+  {
+    label: "LinkedIn",
+    value: "in/bhuvana-gopalam",
+    href: profile.links.linkedin,
+    icon: "linkedin",
+    tone: "linkedin",
+  },
+].filter((item) => item.href);
+---
+
+<section class="section contact-section" id="contact" aria-labelledby="contact-title">
+  <div class="container">
+    <div class="contact-grid">
+      <div class="contact-intro">
+        <p class="section__kicker">Get in Touch</p>
+        <h2 class="section__title" id="contact-title">Let's build something together</h2>
+        <p class="section__intro contact-intro__lead">
+          Open to machine learning and applied AI roles, research collaborations, and
+          interesting project conversations. If you are working on something in computer
+          vision, vision-language models, or applied ML, I would love to connect.
+        </p>
+
+        <div class="contact-links">
+          {
+            contactLinks.map((item) => (
+              <a
+                class:list={["contact-link", `contact-link--${item.tone}`]}
+                href={item.href}
+                target={item.href.startsWith("mailto:") ? undefined : "_blank"}
+                rel={item.href.startsWith("mailto:") ? undefined : "noreferrer"}
+              >
+                <span class="contact-link__icon" aria-hidden="true">
+                  <BrandIcon name={item.icon} />
+                </span>
+                <span class="contact-link__text">
+                  <strong>{item.label}</strong>
+                  <small>{item.value}</small>
+                </span>
+                <span class="contact-link__arrow" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" focusable="false">
+                    <line x1="7" y1="17" x2="17" y2="7" />
+                    <polyline points="7 7 17 7 17 17" />
+                  </svg>
+                </span>
+              </a>
+            ))
+          }
+        </div>
+
+        <div class="contact-availability">
+          <h3>Currently available for</h3>
+          <p>{profile.availability}</p>
+        </div>
+      </div>
+
+      <div class="contact-form-card">
+        <h3 class="contact-form-card__title">Send a message</h3>
+        <p class="contact-form-card__note">
+          This opens your email app with everything filled in — nothing is sent from this
+          page, so you can review before hitting send.
+        </p>
+
+        <form class="contact-form" data-contact-form>
+          <div class="contact-form__row">
+            <div class="contact-form__group">
+              <label for="contact-name">Name</label>
+              <input id="contact-name" name="name" type="text" placeholder="Jane Doe" required />
+            </div>
+            <div class="contact-form__group">
+              <label for="contact-email">Email</label>
+              <input
+                id="contact-email"
+                name="email"
+                type="email"
+                placeholder="jane@company.com"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="contact-form__group">
+            <label for="contact-subject">Subject</label>
+            <input
+              id="contact-subject"
+              name="subject"
+              type="text"
+              placeholder="Collaboration, role, or research"
+            />
+          </div>
+
+          <div class="contact-form__group">
+            <label for="contact-message">Message</label>
+            <textarea
+              id="contact-message"
+              name="message"
+              rows="5"
+              placeholder="Tell me about the opportunity or what you'd like to discuss..."
+              required></textarea>
+          </div>
+
+          <button class="contact-form__submit" type="submit">
+            Send Message
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <line x1="22" y1="2" x2="11" y2="13" />
+              <polygon points="22 2 15 22 11 13 2 9 22 2" />
+            </svg>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script is:inline define:vars={{ recipient: emailAddress }}>
+  (() => {
+    const form = document.querySelector("[data-contact-form]");
+    if (!(form instanceof HTMLFormElement)) return;
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      const data = new FormData(form);
+      const name = String(data.get("name") || "").trim();
+      const email = String(data.get("email") || "").trim();
+      const subject = String(data.get("subject") || "").trim();
+      const message = String(data.get("message") || "").trim();
+
+      const finalSubject = subject || `Portfolio enquiry from ${name}`;
+      const body = `${message}\n\n---\nFrom: ${name}\nReply to: ${email}`;
+
+      window.location.href = `mailto:${recipient}?subject=${encodeURIComponent(
+        finalSubject,
+      )}&body=${encodeURIComponent(body)}`;
+    });
+  })();
+</script>

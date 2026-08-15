@@ -24,7 +24,13 @@ const formatEducationPeriod = (item: (typeof education)[number]) =>
 <section class="hero container" aria-labelledby="hero-title">
   <div class="hero__grid">
     <div>
-      <h1 id="hero-title">Hi, I'm {profile.name.split(" ")[0]}!</h1>
+      <h1 id="hero-title">Hi, I'm <span class="hero__name">{profile.name.split(" ")[0]}</span>!</h1>
+
+      <p class="hero__role">
+        <span class="visually-hidden">{profile.role}</span>
+        <span class="hero__role-text" aria-hidden="true" data-typewriter>{profile.roles[0]}</span>
+      </p>
+
       <p class="hero__lead">{profile.summary}</p>
       <div class="hero__bio">
         {profile.bio.map((paragraph) => <p>{paragraph}</p>)}
@@ -84,3 +90,44 @@ const formatEducationPeriod = (item: (typeof education)[number]) =>
 
   <NewsRail />
 </section>
+
+<script is:inline define:vars={{ roles: profile.roles }}>
+  (() => {
+    const el = document.querySelector("[data-typewriter]");
+    if (!el || !Array.isArray(roles) || roles.length < 2) return;
+
+    // Reduced-motion visitors keep the static first role rendered by the server.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const TYPE_MS = 85;
+    const DELETE_MS = 40;
+    const HOLD_MS = 1900;
+
+    let roleIndex = 0;
+    let charIndex = roles[0].length;
+    let deleting = false;
+
+    const tick = () => {
+      const word = roles[roleIndex];
+      el.textContent = word.slice(0, charIndex);
+
+      if (!deleting && charIndex === word.length) {
+        deleting = true;
+        setTimeout(tick, HOLD_MS);
+        return;
+      }
+
+      if (deleting && charIndex === 0) {
+        deleting = false;
+        roleIndex = (roleIndex + 1) % roles.length;
+        setTimeout(tick, 220);
+        return;
+      }
+
+      charIndex += deleting ? -1 : 1;
+      setTimeout(tick, deleting ? DELETE_MS : TYPE_MS);
+    };
+
+    setTimeout(tick, HOLD_MS);
+  })();
+</script>
