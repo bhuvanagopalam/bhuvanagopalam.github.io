@@ -169,6 +169,7 @@ main {
 
 .nav__links {
   display: flex;
+  min-width: 0;
   align-items: center;
   justify-content: flex-end;
   gap: 6px;
@@ -3555,13 +3556,47 @@ main {
 }
 
 @media (max-width: 560px) {
+  /* At 375px the four nav links overflowed their row and "Contact" was
+     clipped mid-word, so tighten them enough to fit without scrolling. */
+  .nav {
+    gap: 10px;
+  }
+
+  .nav__actions {
+    gap: 6px;
+  }
+
+  .nav__links {
+    gap: 1px;
+  }
+
+  .nav__link {
+    padding: 7px 7px;
+    font-size: 0.79rem;
+  }
+
   .gopher {
     width: 92px;
     top: -64px;
     right: 12px;
   }
 
-  .split-board,
+  /* The train/test board stays side by side even on a phone - seeing both
+     sides at once is the entire point of the demo. It fits at ~171px a column
+     once the rows are tightened. */
+  .split-board {
+    gap: 10px;
+  }
+
+  .split-row {
+    padding: 8px 9px;
+    font-size: 0.76rem;
+  }
+
+  .split-row small {
+    font-size: 0.7rem;
+  }
+
   .matcher__results,
   .confusion__grid {
     grid-template-columns: minmax(0, 1fr);
