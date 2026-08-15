@@ -2536,6 +2536,443 @@ main {
 }
 
 /* ---------------------------------------------------------------------------
+   Shared interactive scaffolding
+   --------------------------------------------------------------------------- */
+
+.interactive__intro {
+  max-width: 640px;
+  margin: 20px 0 0;
+  color: var(--muted);
+  font-size: 1.04rem;
+  line-height: 1.65;
+}
+
+.interactive__note {
+  max-width: 720px;
+  margin: 26px 0 0;
+  border-left: 2px solid rgba(15, 95, 92, 0.3);
+  padding-left: 16px;
+  color: var(--muted);
+  font-size: 0.94rem;
+  line-height: 1.62;
+}
+
+.interactive__note strong {
+  color: var(--accent-strong);
+  font-weight: 800;
+}
+
+.metric-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.metric-row li {
+  display: grid;
+  gap: 2px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 12px 18px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 650;
+}
+
+.metric-row span {
+  color: var(--accent);
+  font-size: 1.5rem;
+  font-weight: 850;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------------------------
+   Drag-to-compare (fracture detection)
+   --------------------------------------------------------------------------- */
+
+.compare {
+  position: relative;
+  max-width: 620px;
+  margin-top: 26px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  touch-action: pan-y;
+  user-select: none;
+  cursor: ew-resize;
+}
+
+.compare__base,
+.compare__overlay img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Clipped rather than width-constrained: both images stay rendered at the exact
+   same size, so the two grids line up pixel for pixel at any handle position. */
+.compare__overlay {
+  position: absolute;
+  inset: 0;
+  clip-path: inset(0 50% 0 0);
+}
+
+.compare__divider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  background: rgba(255, 253, 248, 0.9);
+  transform: translateX(-1px);
+  pointer-events: none;
+}
+
+.compare__handle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.94);
+  color: #1d2528;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+
+.compare__handle svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.compare__tag {
+  position: absolute;
+  top: 12px;
+  border-radius: 999px;
+  background: rgba(15, 25, 22, 0.78);
+  padding: 5px 12px;
+  color: #fffdf8;
+  font-size: 0.74rem;
+  font-weight: 750;
+  pointer-events: none;
+}
+
+.compare__tag--left {
+  left: 12px;
+}
+
+.compare__tag--right {
+  right: 12px;
+}
+
+.compare__range {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  width: calc(100% - 32px);
+  transform: translateX(-50%);
+  opacity: 0;
+}
+
+.compare__range:focus-visible {
+  opacity: 1;
+}
+
+/* ---------------------------------------------------------------------------
+   Split / leakage demo
+   --------------------------------------------------------------------------- */
+
+.split-toggle {
+  display: inline-flex;
+  gap: 4px;
+  margin-top: 24px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  padding: 4px;
+}
+
+.split-toggle__btn {
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  padding: 8px 16px;
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease;
+}
+
+.split-toggle__btn.is-active {
+  background: var(--accent);
+  color: #fffdf8;
+}
+
+.split-board {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  max-width: 640px;
+  margin-top: 20px;
+}
+
+.split-board__col h4 {
+  margin: 0 0 10px;
+  color: var(--faint);
+  font-size: 0.76rem;
+  font-weight: 850;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.split-list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.split-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 9px 12px;
+  color: var(--ink);
+  font-size: 0.86rem;
+  font-weight: 650;
+}
+
+.split-row small {
+  color: var(--faint);
+  font-size: 0.76rem;
+}
+
+.split-row.is-leak {
+  border-color: rgba(138, 75, 56, 0.5);
+  background: rgba(138, 75, 56, 0.09);
+  color: var(--warm);
+}
+
+.split-verdict {
+  max-width: 620px;
+  margin: 18px 0 0;
+  font-size: 0.93rem;
+  font-weight: 650;
+  line-height: 1.55;
+}
+
+.split-verdict[data-tone="bad"] {
+  color: var(--warm);
+}
+
+.split-verdict[data-tone="good"] {
+  color: var(--accent-strong);
+}
+
+/* ---------------------------------------------------------------------------
+   Matcher demo
+   --------------------------------------------------------------------------- */
+
+.matcher {
+  max-width: 620px;
+  margin-top: 24px;
+}
+
+.matcher__label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--ink);
+  font-size: 0.83rem;
+  font-weight: 700;
+}
+
+.matcher__input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 12px 14px;
+  color: var(--ink);
+  font-size: 1rem;
+}
+
+.matcher__input:focus-visible {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(15, 95, 92, 0.16);
+}
+
+.matcher__examples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.matcher__chip {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  padding: 6px 13px;
+  color: var(--muted);
+  font-size: 0.81rem;
+  font-weight: 650;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    color 0.18s ease;
+}
+
+.matcher__chip:hover,
+.matcher__chip:focus-visible {
+  border-color: var(--accent);
+  color: var(--accent-strong);
+}
+
+.matcher__results {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.matcher__result {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 15px;
+}
+
+.matcher__result h4 {
+  margin: 0 0 8px;
+  color: var(--faint);
+  font-size: 0.74rem;
+  font-weight: 850;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.matcher__outcome {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.matcher__outcome[data-tone="good"] {
+  color: var(--accent-strong);
+}
+
+.matcher__outcome[data-tone="bad"] {
+  color: var(--warm);
+}
+
+/* ---------------------------------------------------------------------------
+   Confusion / precision-recall demo
+   --------------------------------------------------------------------------- */
+
+.confusion {
+  max-width: 640px;
+  margin-top: 24px;
+}
+
+.confusion__label {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+.confusion__label strong {
+  color: var(--accent-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+.confusion__range {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.confusion__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.confusion__cell {
+  display: grid;
+  gap: 3px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 16px;
+}
+
+.confusion__num {
+  color: var(--ink);
+  font-size: 1.9rem;
+  font-weight: 850;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.confusion__key {
+  color: var(--ink);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.confusion__cell small {
+  color: var(--faint);
+  font-size: 0.77rem;
+}
+
+.confusion__cell--tp {
+  border-color: rgba(15, 95, 92, 0.32);
+  background: rgba(15, 95, 92, 0.07);
+}
+
+.confusion__cell--tp .confusion__num {
+  color: var(--accent-strong);
+}
+
+.confusion__cell--fp {
+  border-color: rgba(185, 137, 61, 0.4);
+  background: rgba(185, 137, 61, 0.08);
+}
+
+.confusion__cell--fp .confusion__num {
+  color: var(--gold);
+}
+
+.confusion__cell--fn .confusion__num {
+  color: var(--faint);
+}
+
+/* ---------------------------------------------------------------------------
    SQVQA pipeline walkthrough
    --------------------------------------------------------------------------- */
 
@@ -2545,6 +2982,10 @@ main {
   color: var(--muted);
   font-size: 1.04rem;
   line-height: 1.65;
+}
+
+.pipeline--no-image {
+  grid-template-columns: minmax(0, 1fr) !important;
 }
 
 .pipeline {
@@ -3086,6 +3527,12 @@ main {
 }
 
 @media (max-width: 560px) {
+  .split-board,
+  .matcher__results,
+  .confusion__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .contact-form__row {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -3103,6 +3550,40 @@ main {
 :root[data-theme="dark"] .project-detail__links a {
   border-color: rgba(164, 226, 218, 0.5);
   color: #0d1412;
+}
+
+:root[data-theme="dark"] .metric-row li,
+:root[data-theme="dark"] .compare,
+:root[data-theme="dark"] .split-toggle,
+:root[data-theme="dark"] .split-row,
+:root[data-theme="dark"] .matcher__input,
+:root[data-theme="dark"] .matcher__chip,
+:root[data-theme="dark"] .matcher__result,
+:root[data-theme="dark"] .confusion__cell {
+  border-color: rgba(67, 78, 71, 0.7);
+}
+
+:root[data-theme="dark"] .split-toggle__btn.is-active {
+  color: #0d1412;
+}
+
+:root[data-theme="dark"] .interactive__note {
+  border-left-color: rgba(98, 200, 188, 0.4);
+}
+
+:root[data-theme="dark"] .split-row.is-leak {
+  border-color: rgba(222, 161, 132, 0.45);
+  background: rgba(222, 161, 132, 0.1);
+}
+
+:root[data-theme="dark"] .confusion__cell--tp {
+  border-color: rgba(98, 200, 188, 0.35);
+  background: rgba(98, 200, 188, 0.08);
+}
+
+:root[data-theme="dark"] .confusion__cell--fp {
+  border-color: rgba(219, 187, 114, 0.4);
+  background: rgba(219, 187, 114, 0.08);
 }
 
 :root[data-theme="dark"] .pipeline-input img,

@@ -16,8 +16,8 @@ import { projects } from "../data/projects";
             <div class="project-card__content">
               <h3>
                 {
-                  project.detailHref ? (
-                    <a class="project-card__title-link" href={project.detailHref}>
+                  project.slug ? (
+                    <a class="project-card__title-link" href={`/projects/${project.slug}/`}>
                       {project.title}
                       <span class="project-card__title-arrow" aria-hidden="true">
                         <svg viewBox="0 0 24 24" focusable="false">
@@ -32,8 +32,8 @@ import { projects } from "../data/projects";
                 }
               </h3>
               <p>{project.summary}</p>
-              {project.detailHref && (
-                <a class="project-card__walkthrough" href={project.detailHref}>
+              {project.slug && (
+                <a class="project-card__walkthrough" href={`/projects/${project.slug}/`}>
                   Read the walkthrough
                 </a>
               )}

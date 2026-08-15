@@ -1,0 +1,178 @@
+---
+import ConfusionDemo from "../../components/interactive/ConfusionDemo.astro";
+import FractureCompare from "../../components/interactive/FractureCompare.astro";
+import LeakageDemo from "../../components/interactive/LeakageDemo.astro";
+import MatcherDemo from "../../components/interactive/MatcherDemo.astro";
+import StagePipeline from "../../components/interactive/StagePipeline.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { projects } from "../../data/projects";
+import { profile } from "../../data/profile";
+
+export function getStaticPaths() {
+  return projects
+    .filter((project) => project.slug)
+    .map((project) => ({
+      params: { slug: project.slug },
+      props: { project },
+    }));
+}
+
+const { project } = Astro.props;
+
+// Heading shown above the interactive block, per project.
+const interactiveTitles = {
+  "fracture-compare": "Where the model agrees, and where it does not",
+  "sqvqa-pipeline": "Inside SQVQA",
+  leakage: "The bug that made the model look good",
+  matcher: "Why exact matching only got to 8%",
+  confusion: "What perfect recall actually costs",
+  "stream-pipeline": "How a frame becomes an alert",
+};
+
+const sqvqaStages = [
+  {
+    label: "Input",
+    model: "Image",
+    body: "An image goes in on its own - no labels, no metadata, no hand-written prompt describing what to look for.",
+  },
+  {
+    label: "Observe",
+    model: "Qwen2-VL",
+    body: "A vision-language model reads the image and writes a plain-language observation: leaf shape and serration, branching pattern, trichomes, flowering structures.",
+  },
+  {
+    label: "Self-question",
+    model: "The twist",
+    body: "Rather than answering straight away, that written observation becomes the question put to the next model. The system interrogates what it just saw.",
+  },
+  {
+    label: "Answer",
+    model: "OFA VQA",
+    body: "A fine-tuned OFA model answers that question against the original image, returning a decision alongside the reasoning points behind it.",
+  },
+];
+
+const streamStages = [
+  {
+    label: "Ingest",
+    model: "FFmpeg + GStreamer",
+    body: "Multiple camera streams are decoded and normalised concurrently, so the models downstream receive a steady, uniform frame supply rather than raw feeds of differing formats and rates.",
+  },
+  {
+    label: "Segment",
+    model: "U-Net",
+    body: "Frames are reduced to the regions worth spending compute on, cutting the work handed to the heavier network behind it.",
+  },
+  {
+    label: "Recognise action",
+    model: "ResNeXt101 + TSM",
+    body: "Violence is a motion pattern, not a still pose. A temporal shift module lets the network reason across neighbouring frames, so the decision uses movement over time instead of one snapshot.",
+  },
+  {
+    label: "Serve at the edge",
+    model: "TensorRT",
+    body: "The trained graph is compiled for the deployment hardware, which is what pulls end-to-end response under a second and lets several streams share one device.",
+  },
+  {
+    label: "Store and surface",
+    model: "InfluxDB + Streamlit",
+    body: "Detections are written to a time-series store and surfaced on a live dashboard, so operators see events as they land rather than reading logs after the fact.",
+  },
+];
+---
+
+<BaseLayout
+  title={`${project.title} | ${profile.name}`}
+  seoTitle={`${project.title} | ${profile.name}`}
+  description={project.summary}
+>
+  <article class="project-detail">
+    <div class="container">
+      <a class="project-detail__back" href="/#projects">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <line x1="19" y1="12" x2="5" y2="12" />
+          <polyline points="12 19 5 12 12 5" />
+        </svg>
+        All projects
+      </a>
+
+      <p class="section__kicker">Project</p>
+      <h1 class="project-detail__title">{project.title}</h1>
+      <p class="project-detail__summary">{project.summary}</p>
+
+      <ul class="project-detail__tags" aria-label="Stack">
+        {project.tags.map((tag) => <li>{tag}</li>)}
+      </ul>
+
+      {
+        project.links?.length ? (
+          <div class="project-detail__links">
+            {project.links.map((link) => (
+              <a href={link.href} target="_blank" rel="noreferrer">
+                {link.label}
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <line x1="7" y1="17" x2="17" y2="7" />
+                  <polyline points="7 7 17 7 17 17" />
+                </svg>
+              </a>
+            ))}
+          </div>
+        ) : null
+      }
+    </div>
+  </article>
+
+  {
+    project.interactive && (
+      <section class="section interactive-section" aria-labelledby="interactive-title">
+        <div class="container">
+          <div class="compact-heading">
+            <h2 id="interactive-title">{interactiveTitles[project.interactive]}</h2>
+            <span aria-hidden="true" />
+          </div>
+
+          {project.interactive === "fracture-compare" && <FractureCompare />}
+          {project.interactive === "leakage" && <LeakageDemo />}
+          {project.interactive === "matcher" && <MatcherDemo />}
+          {project.interactive === "confusion" && <ConfusionDemo />}
+
+          {project.interactive === "sqvqa-pipeline" && (
+            <StagePipeline
+              intro="Most visual question answering systems are handed a question. This one writes its own - it describes what it sees, then answers the description it just produced."
+              stages={sqvqaStages}
+              image={{
+                src: "/images/sqvqa-example.jpg",
+                alt: "Field photograph of dense vegetation, the kind of image the screening pipeline is given",
+                caption: "A sample input from the screening set",
+              }}
+              resultLead="90% accuracy"
+              result="with zero false positives on the evaluation set"
+            />
+          )}
+
+          {project.interactive === "stream-pipeline" && (
+            <StagePipeline
+              intro="Detecting violence in a recorded clip is a modelling problem. Doing it live, across many cameras, on hardware that sits in the field, is a systems problem - and most of the work went there."
+              stages={streamStages}
+              resultLead="Sub-second"
+              result="end-to-end latency across multiple concurrent streams"
+            />
+          )}
+        </div>
+      </section>
+    )
+  }
+
+  <section class="section" aria-labelledby="highlights-title">
+    <div class="container">
+      <div class="compact-heading">
+        <h2 id="highlights-title">What went into it</h2>
+        <span aria-hidden="true"></span>
+      </div>
+
+      <ul class="project-detail__highlights">
+        {project.highlights.map((highlight) => <li>{highlight}</li>)}
+      </ul>
+    </div>
+  </section>
+</BaseLayout>

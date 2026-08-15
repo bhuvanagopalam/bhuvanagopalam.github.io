@@ -1,0 +1,150 @@
+---
+// Demonstrates the matching problem this system solved. The similarity here is
+// character-level, computed live in the browser; the production system used
+// sentence embeddings over 1,500 drugs, which the note below states plainly.
+---
+
+<div class="interactive">
+  <p class="interactive__intro">
+    Patients do not write drug names the way a drug database stores them. They use brand
+    names, abbreviations, and typos. Exact string matching resolved about 8% of the reviews.
+    Try one of these - or type your own - and watch exact matching fail where similarity
+    matching succeeds.
+  </p>
+
+  <div class="matcher">
+    <label class="matcher__label" for="matcher-input">Patient-written text</label>
+    <input
+      class="matcher__input"
+      id="matcher-input"
+      type="text"
+      value="tylenol"
+      autocomplete="off"
+      spellcheck="false"
+      data-matcher-input
+    />
+
+    <div class="matcher__examples" role="group" aria-label="Example inputs">
+      {
+        ["tylenol", "advil", "amoxicilin", "zoloft", "metformin hcl", "lipitor"].map((example) => (
+          <button type="button" class="matcher__chip" data-matcher-example={example}>
+            {example}
+          </button>
+        ))
+      }
+    </div>
+
+    <div class="matcher__results">
+      <div class="matcher__result" data-matcher-exact>
+        <h4>Exact match</h4>
+        <p class="matcher__outcome"></p>
+      </div>
+      <div class="matcher__result" data-matcher-fuzzy>
+        <h4>Similarity match</h4>
+        <p class="matcher__outcome"></p>
+      </div>
+    </div>
+  </div>
+
+  <p class="interactive__note">
+    The production system matched on sentence embeddings rather than character overlap, over
+    a catalogue of 1,500 drugs, which is what carried accuracy from
+    <strong>8% to 75%</strong> across 3,100 reviews. The comparison above runs a simpler
+    character-similarity measure in your browser so the failure mode is visible without
+    shipping a model to this page.
+  </p>
+</div>
+
+<script is:inline>
+  (() => {
+    const input = document.querySelector("[data-matcher-input]");
+    if (!input) return;
+
+    const exactBox = document.querySelector("[data-matcher-exact] .matcher__outcome");
+    const fuzzyBox = document.querySelector("[data-matcher-fuzzy] .matcher__outcome");
+
+    // A small stand-in catalogue: generic name plus the brand names patients use.
+    const catalogue = [
+      { generic: "Acetaminophen", aliases: ["tylenol", "paracetamol", "panadol"] },
+      { generic: "Ibuprofen", aliases: ["advil", "motrin", "nurofen"] },
+      { generic: "Amoxicillin", aliases: ["amoxil", "moxatag"] },
+      { generic: "Sertraline", aliases: ["zoloft", "lustral"] },
+      { generic: "Metformin", aliases: ["glucophage", "fortamet"] },
+      { generic: "Atorvastatin", aliases: ["lipitor", "torvast"] },
+      { generic: "Omeprazole", aliases: ["prilosec", "losec"] },
+      { generic: "Lisinopril", aliases: ["zestril", "prinivil"] },
+    ];
+
+    const normalise = (value) =>
+      value.toLowerCase().replace(/\b(hcl|sodium|tablets?|mg)\b/g, "").replace(/[^a-z]/g, "");
+
+    // Levenshtein distance, turned into a 0-1 similarity ratio.
+    const similarity = (a, b) => {
+      if (!a || !b) return 0;
+      const rows = a.length + 1;
+      const cols = b.length + 1;
+      let prev = Array.from({ length: cols }, (_, i) => i);
+      for (let i = 1; i < rows; i += 1) {
+        const curr = [i];
+        for (let j = 1; j < cols; j += 1) {
+          curr[j] = Math.min(
+            prev[j] + 1,
+            curr[j - 1] + 1,
+            prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1),
+          );
+        }
+        prev = curr;
+      }
+      return 1 - prev[cols - 1] / Math.max(a.length, b.length);
+    };
+
+    const run = () => {
+      const raw = input.value.trim();
+      const query = normalise(raw);
+
+      if (!query) {
+        exactBox.textContent = "";
+        exactBox.dataset.tone = "";
+        fuzzyBox.textContent = "";
+        fuzzyBox.dataset.tone = "";
+        return;
+      }
+
+      // Exact matching only ever compares against the canonical generic name.
+      const exact = catalogue.find((drug) => normalise(drug.generic) === query);
+      if (exact) {
+        exactBox.dataset.tone = "good";
+        exactBox.textContent = `Resolved to ${exact.generic}`;
+      } else {
+        exactBox.dataset.tone = "bad";
+        exactBox.textContent = "No match - the row is dropped";
+      }
+
+      let best = { drug: null, score: 0 };
+      catalogue.forEach((drug) => {
+        [drug.generic, ...drug.aliases].forEach((candidate) => {
+          const score = similarity(query, normalise(candidate));
+          if (score > best.score) best = { drug, score };
+        });
+      });
+
+      if (best.drug && best.score >= 0.6) {
+        fuzzyBox.dataset.tone = "good";
+        fuzzyBox.textContent = `Resolved to ${best.drug.generic} (${Math.round(best.score * 100)}% similar)`;
+      } else {
+        fuzzyBox.dataset.tone = "bad";
+        fuzzyBox.textContent = "No confident match above threshold";
+      }
+    };
+
+    input.addEventListener("input", run);
+    document.querySelectorAll("[data-matcher-example]").forEach((chip) => {
+      chip.addEventListener("click", () => {
+        input.value = chip.dataset.matcherExample;
+        run();
+      });
+    });
+
+    run();
+  })();
+</script>

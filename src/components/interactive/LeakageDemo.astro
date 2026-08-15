@@ -1,0 +1,114 @@
+---
+// Illustrates why the original train/test split inflated scores on this
+// project. The rows are an illustration of the split strategy, not a sample of
+// the real dataset - the only measured figure quoted is the corrected 0.85.
+---
+
+<div class="interactive">
+  <p class="interactive__intro">
+    The first version of this model looked excellent, and the score was lying. The records are
+    aggregated per airport, carrier and month, so the same airport-carrier pair appears in
+    many rows. Split those rows at random and the model sees the same pair on both sides of
+    the split - it can memorise instead of generalise. Toggle between the two strategies.
+  </p>
+
+  <div class="split-toggle" role="group" aria-label="Split strategy">
+    <button type="button" class="split-toggle__btn is-active" data-split="random">
+      Random row split
+    </button>
+    <button type="button" class="split-toggle__btn" data-split="grouped">
+      Grouped split
+    </button>
+  </div>
+
+  <div class="split-board" data-split-board>
+    <div class="split-board__col">
+      <h4>Train</h4>
+      <ul class="split-list" data-split-train></ul>
+    </div>
+    <div class="split-board__col">
+      <h4>Test</h4>
+      <ul class="split-list" data-split-test></ul>
+    </div>
+  </div>
+
+  <p class="split-verdict" data-split-verdict role="status" aria-live="polite"></p>
+
+  <p class="interactive__note">
+    Regrouping the split so an airport-carrier pair lands entirely on one side removed the
+    leak. The honest number after that correction was <strong>0.85 ROC-AUC</strong> with
+    LightGBM - lower than the leaky version had reported, and the one worth quoting.
+  </p>
+</div>
+
+<script is:inline>
+  (() => {
+    const board = document.querySelector("[data-split-board]");
+    if (!board) return;
+
+    const trainEl = board.querySelector("[data-split-train]");
+    const testEl = board.querySelector("[data-split-test]");
+    const verdict = document.querySelector("[data-split-verdict]");
+    const buttons = [...document.querySelectorAll("[data-split]")];
+
+    const rows = [
+      { pair: "ORD - United", month: "Jan" },
+      { pair: "ORD - United", month: "Feb" },
+      { pair: "ORD - United", month: "Mar" },
+      { pair: "ATL - Delta", month: "Jan" },
+      { pair: "ATL - Delta", month: "Feb" },
+      { pair: "MSP - Delta", month: "Jan" },
+      { pair: "MSP - Delta", month: "Feb" },
+      { pair: "DFW - American", month: "Jan" },
+    ];
+
+    const render = (mode) => {
+      const train = [];
+      const test = [];
+
+      if (mode === "random") {
+        // Rows scattered across both sides, so pairs straddle the split.
+        rows.forEach((row, index) => (index % 3 === 0 ? test : train).push(row));
+      } else {
+        // Whole pairs assigned to one side.
+        const testPairs = new Set(["MSP - Delta", "DFW - American"]);
+        rows.forEach((row) => (testPairs.has(row.pair) ? test : train).push(row));
+      }
+
+      const trainPairs = new Set(train.map((r) => r.pair));
+      const leaked = [...new Set(test.filter((r) => trainPairs.has(r.pair)).map((r) => r.pair))];
+
+      const paint = (el, items) => {
+        el.innerHTML = "";
+        items.forEach((row) => {
+          const li = document.createElement("li");
+          const isLeak = leaked.includes(row.pair);
+          li.className = isLeak ? "split-row is-leak" : "split-row";
+          li.innerHTML = `<span>${row.pair}</span><small>${row.month}</small>`;
+          el.appendChild(li);
+        });
+      };
+
+      paint(trainEl, train);
+      paint(testEl, test);
+
+      if (leaked.length) {
+        verdict.dataset.tone = "bad";
+        verdict.textContent = `${leaked.length} airport-carrier pair${leaked.length > 1 ? "s" : ""} appear on both sides (${leaked.join(", ")}). The test score is measuring memorisation.`;
+      } else {
+        verdict.dataset.tone = "good";
+        verdict.textContent =
+          "No pair appears on both sides. The test set now contains only combinations the model has never seen.";
+      }
+    };
+
+    buttons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        buttons.forEach((b) => b.classList.toggle("is-active", b === btn));
+        render(btn.dataset.split);
+      });
+    });
+
+    render("random");
+  })();
+</script>

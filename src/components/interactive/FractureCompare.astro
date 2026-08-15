@@ -1,0 +1,118 @@
+---
+// Drag-to-compare over the model's own validation batch. Both images are real
+// output from the trained YOLOv12 run - left is the radiologist ground truth,
+// right is what the model predicted on the same 16 X-rays.
+---
+
+<div class="interactive">
+  <p class="interactive__intro">
+    These are the same sixteen validation X-rays, twice. On the left, the fracture sites a
+    radiologist labelled. On the right, what the model actually predicted, with its
+    confidence. Drag the handle across and watch where the two disagree.
+  </p>
+
+  <div
+    class="compare"
+    data-compare
+    role="group"
+    aria-label="Ground truth versus model prediction comparison"
+  >
+    <img class="compare__base" src="/images/fracture-pred.jpg" alt="Model predictions on sixteen validation X-rays, each detection labelled with a confidence score" loading="lazy" width="810" height="1000" />
+
+    <div class="compare__overlay" data-compare-overlay>
+      <img src="/images/fracture-truth.jpg" alt="Radiologist-annotated ground truth fracture locations on the same sixteen X-rays" loading="lazy" width="810" height="1000" />
+    </div>
+
+    <div class="compare__divider" data-compare-divider aria-hidden="true">
+      <span class="compare__handle">
+        <svg viewBox="0 0 24 24" focusable="false">
+          <polyline points="15 18 9 12 15 6" />
+          <polyline points="9 6 15 12 9 18" transform="translate(6)" />
+        </svg>
+      </span>
+    </div>
+
+    <span class="compare__tag compare__tag--left">Ground truth</span>
+    <span class="compare__tag compare__tag--right">Model prediction</span>
+
+    <label class="visually-hidden" for="compare-range">Comparison position</label>
+    <input
+      class="compare__range"
+      id="compare-range"
+      type="range"
+      min="0"
+      max="100"
+      value="50"
+      data-compare-range
+    />
+  </div>
+
+  <p class="interactive__note">
+    Look at the third X-ray in the top row, and the second in row two. Both carry a labelled
+    fracture that the model returns nothing for. That is recall of 0.46 in practice: when it
+    does fire it is usually right (precision 0.78), but it stays silent on roughly half of
+    the real fractures - which is exactly the failure mode that matters for a screening tool,
+    and why the write-up treats it as a triage aid rather than a diagnostic.
+  </p>
+
+  <ul class="metric-row" aria-label="Test set metrics at confidence 0.5">
+    <li><span>0.62</span>mAP@0.5</li>
+    <li><span>0.78</span>Precision</li>
+    <li><span>0.46</span>Recall</li>
+    <li><span>0.71</span>Average IoU</li>
+  </ul>
+</div>
+
+<script is:inline>
+  (() => {
+    const root = document.querySelector("[data-compare]");
+    if (!root) return;
+
+    const overlay = root.querySelector("[data-compare-overlay]");
+    const divider = root.querySelector("[data-compare-divider]");
+    const range = root.querySelector("[data-compare-range]");
+    if (!overlay || !divider || !range) return;
+
+    const setPosition = (percent) => {
+      const clamped = Math.min(100, Math.max(0, percent));
+      overlay.style.clipPath = `inset(0 ${100 - clamped}% 0 0)`;
+      divider.style.left = `${clamped}%`;
+      range.value = String(clamped);
+    };
+
+    const positionFromEvent = (clientX) => {
+      const rect = root.getBoundingClientRect();
+      return ((clientX - rect.left) / rect.width) * 100;
+    };
+
+    let dragging = false;
+
+    const startDrag = (event) => {
+      dragging = true;
+      setPosition(positionFromEvent(event.clientX ?? event.touches?.[0]?.clientX ?? 0));
+    };
+
+    const moveDrag = (event) => {
+      if (!dragging) return;
+      const clientX = event.clientX ?? event.touches?.[0]?.clientX;
+      if (clientX == null) return;
+      // Stop the page from scrolling while a touch drag is in progress.
+      if (event.cancelable) event.preventDefault();
+      setPosition(positionFromEvent(clientX));
+    };
+
+    const endDrag = () => {
+      dragging = false;
+    };
+
+    root.addEventListener("pointerdown", startDrag);
+    window.addEventListener("pointermove", moveDrag, { passive: false });
+    window.addEventListener("pointerup", endDrag);
+    window.addEventListener("pointercancel", endDrag);
+
+    // The range input keeps this operable by keyboard and assistive tech.
+    range.addEventListener("input", () => setPosition(Number(range.value)));
+
+    setPosition(50);
+  })();
+</script>

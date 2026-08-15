@@ -8,8 +8,10 @@ export type Project = {
     label: string;
     href: string;
   }>;
-  // When set, the card title links through to a full write-up page.
-  detailHref?: string;
+  // When set, the card title links through to a full write-up page at
+  // /projects/<slug>/ and that page renders the named interactive.
+  slug?: string;
+  interactive?: "fracture-compare" | "sqvqa-pipeline" | "leakage" | "matcher" | "confusion" | "stream-pipeline";
 };
 
 export const projects: Project[] = [
@@ -27,6 +29,8 @@ export const projects: Project[] = [
     ],
     tags: ["PyTorch", "Object Detection", "Medical Imaging", "Faster R-CNN", "RetinaNet", "Grad-CAM"],
     links: [{ label: "GitHub", href: "https://github.com/bhuvanagopalam/Bone-Fracture-Detection" }],
+    slug: "bone-fracture-detection",
+    interactive: "fracture-compare",
   },
   {
     title: "Self-Questioning Visual Question Answering System",
@@ -42,7 +46,8 @@ export const projects: Project[] = [
     ],
     tags: ["PyTorch", "Transformers", "OFA", "Qwen2-VL", "Gradio", "llama.cpp", "Computer Vision"],
     links: [{ label: "GitHub", href: "https://github.com/bhuvanagopalam/SQVQA" }],
-    detailHref: "/projects/sqvqa/",
+    slug: "sqvqa",
+    interactive: "sqvqa-pipeline",
   },
   {
     title: "Airline Delay Risk Prediction",
@@ -57,6 +62,8 @@ export const projects: Project[] = [
       "Achieved 0.85 ROC-AUC with LightGBM after correcting data leakage through improved train-test splitting.",
     ],
     tags: ["Python", "Pandas", "NumPy", "Random Forest", "LightGBM", "Feature Engineering"],
+    slug: "airline-delay-risk",
+    interactive: "leakage",
   },
   {
     title: "Semantic Matching System for Drug Review Data Integration",
@@ -71,6 +78,8 @@ export const projects: Project[] = [
       "Enabled analysis of top side effects per drug and brand-versus-generic comparisons.",
     ],
     tags: ["PostgreSQL", "Python", "LLMs", "Transformers", "Pinecone", "Semantic Search"],
+    slug: "semantic-drug-matching",
+    interactive: "matcher",
   },
   {
     title: "Image Forgery Detection System",
@@ -85,6 +94,8 @@ export const projects: Project[] = [
       "Deployed a Gradio interface with Grad-CAM visualization for real-time forgery detection and attention heatmaps.",
     ],
     tags: ["PyTorch", "Faster-ViT", "EfficientNet-B3", "Grad-CAM", "Gradio", "Computer Vision"],
+    slug: "image-forgery-detection",
+    interactive: "confusion",
   },
   {
     title: "Real-Time Violence Detection System",
@@ -99,5 +110,7 @@ export const projects: Project[] = [
       "Focused on scalable real-time inference for large-scale public safety monitoring scenarios.",
     ],
     tags: ["PyTorch", "OpenCV", "FFmpeg", "GStreamer", "TensorRT", "Streamlit", "Action Recognition"],
+    slug: "real-time-violence-detection",
+    interactive: "stream-pipeline",
   },
 ];

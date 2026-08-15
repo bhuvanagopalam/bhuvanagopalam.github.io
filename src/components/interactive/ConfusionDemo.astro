@@ -1,0 +1,99 @@
+---
+// Works out what the reported precision/recall actually mean in operation.
+// Every number shown is derived arithmetically from the two measured figures
+// (precision 0.64, recall 1.00) - nothing here is invented.
+---
+
+<div class="interactive">
+  <p class="interactive__intro">
+    Recall of 1.00 and precision of 0.64 is an unusual pairing, and it says something specific
+    about how this detector behaves. It never misses a forgery. It pays for that by calling
+    some genuine images fake. Drag the slider to see what that trade looks like at volume.
+  </p>
+
+  <div class="confusion">
+    <label class="confusion__label" for="confusion-range">
+      Forged images in the batch: <strong data-confusion-count>100</strong>
+    </label>
+    <input
+      class="confusion__range"
+      id="confusion-range"
+      type="range"
+      min="10"
+      max="500"
+      step="10"
+      value="100"
+      data-confusion-range
+    />
+
+    <div class="confusion__grid">
+      <div class="confusion__cell confusion__cell--tp">
+        <span class="confusion__num" data-confusion-tp>100</span>
+        <span class="confusion__key">Forgeries caught</span>
+        <small>True positives</small>
+      </div>
+      <div class="confusion__cell confusion__cell--fn">
+        <span class="confusion__num" data-confusion-fn>0</span>
+        <span class="confusion__key">Forgeries missed</span>
+        <small>False negatives</small>
+      </div>
+      <div class="confusion__cell confusion__cell--fp">
+        <span class="confusion__num" data-confusion-fp>56</span>
+        <span class="confusion__key">Genuine images wrongly flagged</span>
+        <small>False positives</small>
+      </div>
+      <div class="confusion__cell confusion__cell--review">
+        <span class="confusion__num" data-confusion-review>156</span>
+        <span class="confusion__key">Total sent for human review</span>
+        <small>Everything the model flags</small>
+      </div>
+    </div>
+  </div>
+
+  <p class="interactive__note">
+    For a forensics workflow this is arguably the right way round to be wrong: nothing
+    fraudulent slips through, and the cost is a reviewer clearing roughly
+    <strong data-confusion-ratio>36</strong>% of the queue as false alarms. Flip the priority
+    - say, auto-rejecting flagged uploads with no human in the loop - and the same model
+    becomes unusable. Measured accuracy was 82.32% on validation and 81.77% on test; the
+    counts above are derived from the reported precision and recall.
+  </p>
+</div>
+
+<script is:inline>
+  (() => {
+    const range = document.querySelector("[data-confusion-range]");
+    if (!range) return;
+
+    const PRECISION = 0.64;
+    const RECALL = 1.0;
+
+    const el = {
+      count: document.querySelector("[data-confusion-count]"),
+      tp: document.querySelector("[data-confusion-tp]"),
+      fn: document.querySelector("[data-confusion-fn]"),
+      fp: document.querySelector("[data-confusion-fp]"),
+      review: document.querySelector("[data-confusion-review]"),
+      ratio: document.querySelector("[data-confusion-ratio]"),
+    };
+
+    const update = () => {
+      const forged = Number(range.value);
+      const tp = Math.round(forged * RECALL);
+      const fn = forged - tp;
+      // precision = tp / (tp + fp)  =>  fp = tp * (1 / precision - 1)
+      const fp = Math.round(tp * (1 / PRECISION - 1));
+      const review = tp + fp;
+
+      el.count.textContent = String(forged);
+      el.tp.textContent = String(tp);
+      el.fn.textContent = String(fn);
+      el.fp.textContent = String(fp);
+      el.review.textContent = String(review);
+      el.ratio.textContent = String(Math.round((fp / review) * 100));
+    };
+
+    range.addEventListener("input", update);
+    update();
+  })();
+</script>

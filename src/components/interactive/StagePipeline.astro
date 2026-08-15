@@ -1,0 +1,125 @@
+---
+// Sequenced walkthrough of an architecture. Stage copy always describes what a
+// component does - it never quotes model output, so nothing reads as a live
+// inference result.
+type Stage = {
+  label: string;
+  model: string;
+  body: string;
+};
+
+type Props = {
+  intro: string;
+  stages: Stage[];
+  image?: { src: string; alt: string; caption: string };
+  result?: string;
+  resultLead?: string;
+};
+
+const { intro, stages, image, result, resultLead } = Astro.props;
+---
+
+<div class="interactive">
+  <p class="interactive__intro">{intro}</p>
+
+  <div class:list={["pipeline", !image && "pipeline--no-image"]} data-pipeline>
+    {
+      image && (
+        <figure class="pipeline-input">
+          <img src={image.src} alt={image.alt} loading="lazy" width="720" height="540" />
+          <figcaption>{image.caption}</figcaption>
+        </figure>
+      )
+    }
+
+    <ol class="pipeline-stages">
+      {
+        stages.map((stage, index) => (
+          <li class="pipeline-stage" data-stage={index}>
+            <div class="pipeline-stage__marker" aria-hidden="true">
+              <span>{index + 1}</span>
+            </div>
+            <div class="pipeline-stage__content">
+              <div class="pipeline-stage__head">
+                <h3>{stage.label}</h3>
+                <span class="pipeline-stage__model">{stage.model}</span>
+              </div>
+              <p>{stage.body}</p>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+
+  <div class="pipeline-footer">
+    {
+      result && (
+        <p class="pipeline-result">
+          <strong>{resultLead}</strong> {result}
+        </p>
+      )
+    }
+    <button class="pipeline-replay" type="button" data-pipeline-replay hidden>
+      Replay
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M3 12a9 9 0 1 0 3-6.7" />
+        <polyline points="3 4 3 10 9 10" />
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script is:inline>
+  (() => {
+    const pipeline = document.querySelector("[data-pipeline]");
+    if (!pipeline) return;
+
+    const stages = [...pipeline.querySelectorAll(".pipeline-stage")];
+    const replay = document.querySelector("[data-pipeline-replay]");
+    if (!stages.length) return;
+
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // Never gate the content itself behind an animation that may not run.
+    if (reduceMotion || typeof IntersectionObserver === "undefined") {
+      stages.forEach((s) => s.classList.add("is-active"));
+      return;
+    }
+
+    let timers = [];
+    const clearTimers = () => {
+      timers.forEach(clearTimeout);
+      timers = [];
+    };
+
+    const play = () => {
+      clearTimers();
+      stages.forEach((s) => s.classList.remove("is-active"));
+      stages.forEach((stage, index) => {
+        timers.push(setTimeout(() => stage.classList.add("is-active"), 260 + index * 620));
+      });
+      timers.push(
+        setTimeout(
+          () => stages.forEach((s) => s.classList.add("is-active")),
+          260 + stages.length * 620 + 900,
+        ),
+      );
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          play();
+          if (replay) replay.hidden = false;
+          observer.unobserve(entry.target);
+        });
+      },
+      { threshold: 0.25 },
+    );
+
+    observer.observe(pipeline);
+    if (replay) replay.addEventListener("click", play);
+  })();
+</script>
