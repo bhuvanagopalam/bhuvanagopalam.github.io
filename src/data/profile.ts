@@ -36,7 +36,7 @@ export const profile = {
 // email at https://web3forms.com - they send the key straight back to you.
 // While this is empty the form falls back to opening the visitor's mail app.
 export const contactForm = {
-  web3formsAccessKey: "",
+  web3formsAccessKey: "a9d43133-918f-4234-a7a0-672c44074feb",
 };
 
 export const navigation = [
