@@ -1,0 +1,512 @@
+---
+// The real fingertip recording from the hackathon (902 camera frames of
+// average red/green/blue over the flash, then a press-and-release), analysed
+// here in the browser with the same steps as Vigil's server/vitals.py:
+// settle, detrend, band-pass, spectral rate, beat detection, HRV, perfusion,
+// breathing, then the refill fit. Nothing on this page is typed in by hand -
+// every number is computed from the frames when the page runs.
+import sample from "../../data/vigil-finger-sample.json";
+---
+
+<div class="interactive vigil" data-vigil>
+  <script type="application/json" data-vigil-data set:html={JSON.stringify(sample)} />
+
+  <p class="interactive__intro">
+    This is the actual 30-second reading taken on a phone during the hackathon: a fingertip over
+    the flash, the camera watching the glow. Each heartbeat pushes blood into the finger and the
+    red channel dips. Press play to watch the pulse come out of that glow, and the numbers a nurse
+    would see appear as the analysis runs.
+  </p>
+
+  <div class="vigil__panel">
+    <div class="vigil__panel-head">
+      <h3>Fingertip pulse</h3>
+      <div class="vigil__controls" role="group" aria-label="Playback">
+        <button type="button" class="vigil__btn" data-vigil-play>Play the recording</button>
+        <button type="button" class="vigil__btn vigil__btn--ghost" data-vigil-speed aria-pressed="false">4x speed</button>
+        <span class="vigil__clock" data-vigil-clock aria-live="off">0.0 s</span>
+      </div>
+    </div>
+    <canvas class="vigil__monitor" data-vigil-monitor height="170" aria-label="Pulse waveform from the fingertip recording"></canvas>
+    <p class="vigil__status" data-vigil-status aria-live="polite">Camera settling, first two seconds are dropped.</p>
+    <ul class="metric-row vigil__metrics" aria-label="Measured vitals">
+      <li><span data-vigil-hr>–</span>Heart rate, bpm</li>
+      <li><span data-vigil-rr>–</span>Breathing, /min</li>
+      <li><span data-vigil-hrv>–</span>HRV (RMSSD), ms</li>
+      <li><span data-vigil-pi>–</span>Perfusion index, %</li>
+      <li><span data-vigil-sqi>–</span>Signal quality</li>
+    </ul>
+  </div>
+
+  <div class="vigil__panel">
+    <div class="vigil__panel-head">
+      <h3>Capillary refill</h3>
+      <span class="vigil__crt" data-vigil-crt>–</span>
+    </div>
+    <svg class="vigil__refill" data-vigil-refill viewBox="0 0 600 180" role="img" aria-label="Red level during the press-and-release test"></svg>
+    <p class="vigil__status" data-vigil-crt-note></p>
+  </div>
+
+  <div class="vigil__panel">
+    <div class="vigil__panel-head">
+      <h3>What the nurse board does with it</h3>
+    </div>
+    <p class="vigil__lead">
+      The score is Vigil's real rule set: NEWS2 bands for heart and breathing rate, two points for
+      a refill over two seconds, one for weak perfusion, two for a red-flag complaint, one for pain
+      of eight or more, and trend since arrival. Type what a patient might type at check-in and
+      watch the reasons change.
+    </p>
+    <div class="vigil__board">
+      <div class="vigil__inputs">
+        <label class="vigil__field">
+          <span>What brings you in today?</span>
+          <input type="text" value="headache since this morning" autocomplete="off" spellcheck="false" data-vigil-complaint />
+        </label>
+        <div class="vigil__chips" role="group" aria-label="Example complaints">
+          {
+            ["headache since this morning", "chest pain and sweaty", "can't breathe properly", "fever and confused", "fell, bleeding from my hand"].map((c) => (
+              <button type="button" class="vigil__chip" data-vigil-example={c}>{c}</button>
+            ))
+          }
+        </div>
+        <label class="vigil__field">
+          <span>Pain: <strong data-vigil-pain-out>3</strong> / 10</span>
+          <input type="range" min="0" max="10" step="1" value="3" data-vigil-pain />
+        </label>
+        <fieldset class="vigil__recheck">
+          <legend>What if the 15-minute re-check read differently?</legend>
+          <label class="vigil__field">
+            <span>Heart rate <strong data-vigil-hr2-out>–</strong> bpm</span>
+            <input type="range" min="40" max="150" step="1" value="72" data-vigil-hr2 disabled />
+          </label>
+          <label class="vigil__field">
+            <span>Breathing <strong data-vigil-rr2-out>–</strong> /min</span>
+            <input type="range" min="6" max="36" step="1" value="14" data-vigil-rr2 disabled />
+          </label>
+        </fieldset>
+      </div>
+      <div class="vigil__row" data-vigil-row>
+        <div class="vigil__row-top">
+          <span class="vigil__row-name">You</span>
+          <span class="vigil__score"><strong data-vigil-score>–</strong> points</span>
+        </div>
+        <ul class="vigil__vitals" data-vigil-vitals></ul>
+        <ul class="vigil__reasons" data-vigil-reasons><li class="vigil__muted">Waiting for the reading.</li></ul>
+        <p class="vigil__flags" data-vigil-flags></p>
+      </div>
+    </div>
+  </div>
+
+  <p class="interactive__note">
+    One recording, one person, on a phone with no medical certification. Vigil is a reassessment
+    aid for a nurse between checks, not a diagnostic: one camera wavelength means no oxygen
+    saturation and no blood pressure. The server also shows a risk percentile from a logistic model
+    trained on PhysioNet ICU data; that model is left out here so the page stays small. The
+    re-check sliders are the only hypothetical inputs on this page, and they exist to show the
+    trend rules.
+  </p>
+</div>
+
+<script is:inline>
+  (() => {
+    const root = document.querySelector("[data-vigil]");
+    if (!root) return;
+    const DATA = JSON.parse(root.querySelector("[data-vigil-data]").textContent);
+
+    /* ---------- numerics: the same operations as server/vitals.py ---------- */
+    const mean = (a) => a.reduce((s, v) => s + v, 0) / a.length;
+    const std = (a) => { const m = mean(a); return Math.sqrt(mean(a.map((v) => (v - m) * (v - m)))); };
+    const clip = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+    const percentile = (arr, p) => {
+      const s = Array.from(arr).sort((x, y) => x - y);
+      const idx = (p / 100) * (s.length - 1);
+      const lo = Math.floor(idx), hi = Math.ceil(idx);
+      return s[lo] + (s[hi] - s[lo]) * (idx - lo);
+    };
+    const median = (arr) => percentile(arr, 50);
+    const diff = (a) => a.slice(1).map((v, i) => v - a[i]);
+
+    // np.convolve(x, ones(w)/w, mode="same")
+    function movAvgSame(x, w) {
+      const n = x.length, out = new Float64Array(n), off = Math.floor((w - 1) / 2);
+      const ps = new Float64Array(n + 1);
+      for (let i = 0; i < n; i++) ps[i + 1] = ps[i] + x[i];
+      for (let i = 0; i < n; i++) {
+        const m = i + off, lo = Math.max(0, m - w + 1), hi = Math.min(n - 1, m);
+        out[i] = (ps[hi + 1] - ps[lo]) / w;
+      }
+      return out;
+    }
+    // Direct DFT on the bins we keep. The recording is ~900 frames, so this is cheap.
+    function dftBins(x, ks) {
+      const n = x.length, re = new Float64Array(ks.length), im = new Float64Array(ks.length);
+      for (let q = 0; q < ks.length; q++) {
+        const w = (2 * Math.PI * ks[q]) / n; let r = 0, i = 0;
+        for (let j = 0; j < n; j++) { const a = w * j; r += x[j] * Math.cos(a); i -= x[j] * Math.sin(a); }
+        re[q] = r; im[q] = i;
+      }
+      return { re, im };
+    }
+    // rfft -> zero everything outside [lo, hi] Hz -> irfft
+    function bandpass(x, fs, lo, hi) {
+      const n = x.length, m = mean(x), xc = Array.from(x, (v) => v - m), ks = [];
+      for (let k = 0; k <= Math.floor(n / 2); k++) { const fr = (k * fs) / n; if (!(fr < lo || fr > hi)) ks.push(k); }
+      const { re, im } = dftBins(xc, ks), out = new Float64Array(n), half = n / 2;
+      for (let j = 0; j < n; j++) {
+        let s = 0;
+        for (let q = 0; q < ks.length; q++) {
+          const k = ks[q], a = (2 * Math.PI * k * j) / n, c = k === 0 || (n % 2 === 0 && k === half) ? 1 : 2;
+          s += c * (re[q] * Math.cos(a) - im[q] * Math.sin(a));
+        }
+        out[j] = s / n;
+      }
+      return out;
+    }
+    // strongest frequency in (lo, hi) Hz of the Hann-windowed signal, and its height over the median bin
+    function spectralPeak(x, fs, lo, hi) {
+      const n = x.length;
+      if (n < 8) return [null, 0];
+      const m = mean(x), xw = Array.from(x, (v, i) => (v - m) * (0.5 - 0.5 * Math.cos((2 * Math.PI * i) / (n - 1))));
+      const ks = [];
+      for (let k = 0; k <= Math.floor(n / 2); k++) { const fr = (k * fs) / n; if (fr > lo && fr < hi) ks.push(k); }
+      if (ks.length < 3) return [null, 0];
+      const { re, im } = dftBins(xw, ks), P = Array.from(re, (r, q) => r * r + im[q] * im[q]);
+      let best = 0; for (let q = 1; q < P.length; q++) if (P[q] > P[best]) best = q;
+      return [(ks[best] * fs) / n, P[best] / (median(P) + 1e-12)];
+    }
+    // local maxima above zero, with a refractory gap that swallows the dicrotic notch
+    function peaks(x, t, minGap) {
+      const out = [];
+      for (let i = 1; i < x.length - 1; i++) {
+        if (!(x[i] > x[i - 1] && x[i] >= x[i + 1] && x[i] > 0)) continue;
+        if (out.length && t[i] - t[out[out.length - 1]] < minGap) { if (x[i] > x[out[out.length - 1]]) out[out.length - 1] = i; }
+        else out.push(i);
+      }
+      return out;
+    }
+    function interp(xs, xp, fp) {
+      return xs.map((x) => {
+        if (x <= xp[0]) return fp[0];
+        if (x >= xp[xp.length - 1]) return fp[fp.length - 1];
+        let i = 1; while (xp[i] < x) i++;
+        const f = (x - xp[i - 1]) / (xp[i] - xp[i - 1]);
+        return fp[i - 1] + f * (fp[i] - fp[i - 1]);
+      });
+    }
+    // np.gradient(f, t) for unevenly spaced t
+    function gradient(f, t) {
+      const n = f.length, out = new Float64Array(n);
+      out[0] = (f[1] - f[0]) / (t[1] - t[0]);
+      out[n - 1] = (f[n - 1] - f[n - 2]) / (t[n - 1] - t[n - 2]);
+      for (let i = 1; i < n - 1; i++) {
+        const hs = t[i] - t[i - 1], hd = t[i + 1] - t[i];
+        out[i] = (hs * hs * f[i + 1] + (hd * hd - hs * hs) * f[i] - hd * hd * f[i - 1]) / (hs * hd * (hd + hs));
+      }
+      return out;
+    }
+
+    function analyzePPG(frames) {
+      const a = frames.slice().sort((p, q) => p[0] - q[0]);
+      if (a.length < 100) return { ok: false, reason: "too few frames" };
+      const t0 = a[0][0];
+      let t = a.map((f) => f[0] - t0);
+      const dur = t[t.length - 1], fs = t.length / Math.max(dur, 1e-6);
+      const R = a.map((f) => f[1]), G = a.map((f) => f[2]);
+      const torch = mean(R) > 120 && mean(G) < 60;
+      let raw = torch ? R : G;
+      const dc = mean(raw);
+      if (torch && (dc < 60 || dc > 250)) return { ok: false, reason: "finger not covering the lens" };
+      const keep = t.map((v) => v > 2.0);
+      t = t.filter((_, i) => keep[i]); raw = raw.filter((_, i) => keep[i]);
+      if (t.length < 100) return { ok: false, reason: "too short after settling" };
+      const s = raw.map((v) => -v), w = Math.max(3, Math.floor(fs));
+      const ma = movAvgSame(s, w), hp = s.map((v, i) => v - ma[i]);
+      const bp = bandpass(hp, fs, 0.7, 3.0);
+      const [fHr, snr] = spectralPeak(hp, fs, 0.7, 3.0);
+      const expIbi = fHr ? 1 / fHr : 0.8;
+      const pk = peaks(bp, t, 0.6 * expIbi);
+      let ibi = pk.length > 2 ? diff(pk.map((i) => t[i])) : [];
+      ibi = ibi.filter((v) => Math.abs(v - expIbi) < 0.25 * expIbi);
+      const hrPk = ibi.length >= 5 ? 60 / median(ibi) : null;
+      let hr = fHr ? fHr * 60 : null;
+      if (hrPk !== null && hr !== null && Math.abs(hrPk - hr) < 0.1 * hr) hr = hrPk;
+      const rmssd = ibi.length >= 6 ? Math.sqrt(mean(diff(ibi).map((v) => v * v))) * 1000 : null;
+      const ac = percentile(bp, 95) - percentile(bp, 5);
+      const pi = dc > 0 ? (ac / dc) * 100 : null;
+      const cands = [];
+      if (pk.length >= 8) {
+        const tp = pk.map((i) => t[i]), amp = pk.map((i) => bp[i]), d = diff(tp), freq = d.concat([d[d.length - 1]]);
+        const count = Math.ceil((tp[tp.length - 1] - tp[0]) / 0.25), tu = Array.from({ length: count }, (_, i) => tp[0] + i * 0.25);
+        for (const series of [amp, freq]) {
+          if (tu.length > 40) { const [f, q] = spectralPeak(interp(tu, tp, series), 4.0, 0.15, 0.6); if (f) cands.push([q, f * 60]); }
+        }
+      }
+      { const [f, q] = spectralPeak(bandpass(hp, fs, 0.15, 0.6), fs, 0.15, 0.6); if (f) cands.push([q, f * 60]); }
+      let rr = null;
+      if (cands.length) { cands.sort((x, y) => y[0] - x[0]); rr = cands[0][1]; }
+      const reg = ibi.length >= 5 ? clip(1 - (std(ibi) / mean(ibi)) * 2, 0, 1) : 0;
+      const sqi = clip(Math.min(snr / 20, 1) * 0.6 + reg * 0.4, 0, 1);
+      return {
+        ok: hr !== null && sqi > 0.25, fs, t, bp, peaks: pk, beats: ibi.length,
+        hr: hr ? Math.round(hr) : null, rr: rr ? Math.round(rr) : null,
+        rmssd: rmssd ? Math.round(rmssd) : null, pi: pi ? Math.round(pi * 100) / 100 : null, sqi: Math.round(sqi * 100) / 100,
+      };
+    }
+
+    function analyzeCRT(frames, releaseT) {
+      const a = frames.slice().sort((p, q) => p[0] - q[0]);
+      if (a.length < 100) return { ok: false, reason: "too few frames" };
+      const t = a.map((f) => f[0]), R = a.map((f) => f[1]), n = t.length;
+      const fs = n / Math.max(t[n - 1] - t[0], 1e-6);
+      const sm = movAvgSame(R, Math.max(3, Math.floor(0.15 * fs)));
+      let d = gradient(sm, t);
+      if (releaseT != null) {
+        const win = t.map((v) => v > releaseT - 1.5 && v < releaseT + 3.5);
+        if (win.filter(Boolean).length > 5) d = d.map((v, i) => (win[i] ? v : 0));
+      }
+      let i0 = 0; for (let i = 1; i < n; i++) if (d[i] < d[i0]) i0 = i;
+      if (d[i0] > -8.0) return { ok: false, reason: "no release detected", t, sm };
+      const pre = t.map((v) => v >= t[i0] - 2.5 && v < t[i0]), post = t.map((v) => v >= t[i0] && v <= t[i0] + 6);
+      const preIdx = [], postIdx = [];
+      pre.forEach((b, i) => b && preIdx.push(i)); post.forEach((b, i) => b && postIdx.push(i));
+      if (preIdx.length < 5 || postIdx.length < 20) return { ok: false, reason: "not enough data around release", t, sm };
+      const y0 = percentile(preIdx.map((i) => sm[i]), 90);
+      const tEnd = t[postIdx[postIdx.length - 1]];
+      const yInf = median(postIdx.filter((i) => t[i] >= tEnd - 2.0).map((i) => sm[i]));
+      const amp = y0 - yInf;
+      if (amp < 12) return { ok: false, reason: "blanching too small", t, sm };
+      const cand = preIdx.filter((i) => sm[i] >= y0 - 0.1 * amp);
+      const on = cand.length ? cand[cand.length - 1] : i0, tOn = t[on];
+      const segIdx = []; t.forEach((v, i) => v >= tOn && v <= tOn + 6 && segIdx.push(i));
+      const ts = segIdx.map((i) => t[i] - tOn), ys = segIdx.map((i) => sm[i]);
+      const thr90 = y0 - 0.9 * amp;
+      let t90 = null; for (let i = 0; i < ys.length; i++) if (ys[i] <= thr90) { t90 = ts[i]; break; }
+      const frac = ys.map((y) => (y - yInf) / amp);
+      let end = frac.findIndex((v) => v <= 0.05); if (end < 0) end = frac.length;
+      const fx = [], fy = [];
+      for (let i = 0; i < end; i++) if (frac[i] > 0.05 && frac[i] < 0.95) { fx.push(ts[i]); fy.push(Math.log(frac[i])); }
+      let tau = null;
+      if (fx.length >= 5) {
+        const mx = mean(fx), my = mean(fy);
+        const slope = fx.reduce((s, x, i) => s + (x - mx) * (fy[i] - my), 0) / fx.reduce((s, x) => s + (x - mx) * (x - mx), 0);
+        if (slope < 0 && 0.05 < -1 / slope && -1 / slope < 5) tau = -1 / slope;
+      }
+      return { ok: t90 !== null, t, sm, i0, tOn, y0, yInf, amp, thr90, t90, tau, releaseFrame: t[i0] };
+    }
+
+    /* ---------- scoring: score_patient and complaint_flags from vitals.py ---------- */
+    const RED_FLAGS = {
+      "chest pain": "chest pain", "chest pressure": "chest pain", "short of breath": "breathing", "shortness of breath": "breathing",
+      "can't breathe": "breathing", "cant breathe": "breathing", "difficulty breathing": "breathing", "stroke": "stroke",
+      "face droop": "stroke", "slurred": "stroke", "weakness one side": "stroke", "numb": "stroke",
+      "pregnan": "pregnancy", "bleeding": "bleeding", "vomiting blood": "bleeding", "black stool": "bleeding",
+      "fainted": "syncope", "passed out": "syncope", "unconscious": "syncope", "seizure": "seizure",
+      "allergic": "anaphylaxis", "swelling throat": "anaphylaxis", "overdose": "overdose", "suicid": "psych",
+      "infant": "infant", "baby": "infant", "fever": "fever", "confus": "confusion",
+    };
+    const SEVERE = new Set(["chest pain", "breathing", "stroke", "bleeding", "syncope", "seizure", "anaphylaxis", "overdose", "infant", "confusion"]);
+    const complaintFlags = (text) => [...new Set(Object.keys(RED_FLAGS).filter((k) => (text || "").toLowerCase().includes(k)).map((k) => RED_FLAGS[k]))].sort();
+    const newsHr = (hr) => (hr == null ? 0 : hr <= 40 ? 3 : hr <= 50 ? 1 : hr <= 90 ? 0 : hr <= 110 ? 1 : hr <= 130 ? 2 : 3);
+    const newsRr = (rr) => (rr == null ? 0 : rr <= 8 ? 3 : rr <= 11 ? 1 : rr <= 20 ? 0 : rr <= 24 ? 2 : 3);
+
+    function scorePatient(first, last, flags, pain) {
+      const reasons = []; let score = 0;
+      const h = newsHr(last.hr), r = newsRr(last.rr);
+      if (h) reasons.push(`HR ${last.hr} (+${h})`);
+      if (r) reasons.push(`RR ${last.rr} (+${r})`);
+      score += h + r;
+      if (first !== last && first.hr && last.hr && last.hr > 1.2 * first.hr) { score += 1; reasons.push(`HR up ${Math.round((last.hr / first.hr - 1) * 100)}% since arrival (+1)`); }
+      if (first !== last && first.rr && last.rr && last.rr >= first.rr + 4) { score += 1; reasons.push(`RR up ${last.rr - first.rr} since arrival (+1)`); }
+      if (last.crt != null && last.crt > 2.0) { score += 2; reasons.push(`capillary refill ${last.crt} s (+2)`); }
+      if (last.pi != null && last.pi < 0.3) { score += 1; reasons.push("weak perfusion (+1)"); }
+      for (const f of flags) if (SEVERE.has(f)) { score += 2; reasons.push(`complaint: ${f} (+2)`); }
+      if (pain != null && pain >= 8) { score += 1; reasons.push(`pain ${pain}/10 (+1)`); }
+      return { score, reasons };
+    }
+
+    /* ---------- elements ---------- */
+    const $ = (sel) => root.querySelector(sel);
+    const el = {
+      play: $("[data-vigil-play]"), speed: $("[data-vigil-speed]"), clock: $("[data-vigil-clock]"), status: $("[data-vigil-status]"),
+      canvas: $("[data-vigil-monitor]"), hr: $("[data-vigil-hr]"), rr: $("[data-vigil-rr]"), hrv: $("[data-vigil-hrv]"), pi: $("[data-vigil-pi]"), sqi: $("[data-vigil-sqi]"),
+      crt: $("[data-vigil-crt]"), crtNote: $("[data-vigil-crt-note]"), refill: $("[data-vigil-refill]"),
+      complaint: $("[data-vigil-complaint]"), pain: $("[data-vigil-pain]"), painOut: $("[data-vigil-pain-out]"),
+      hr2: $("[data-vigil-hr2]"), hr2Out: $("[data-vigil-hr2-out]"), rr2: $("[data-vigil-rr2]"), rr2Out: $("[data-vigil-rr2-out]"),
+      score: $("[data-vigil-score]"), vitals: $("[data-vigil-vitals]"), reasons: $("[data-vigil-reasons]"), flags: $("[data-vigil-flags]"), row: $("[data-vigil-row]"),
+    };
+    const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    /* ---------- the full analysis, once ---------- */
+    const frames = DATA.frames, frameT0 = frames[0][0];
+    const full = analyzePPG(frames);
+    const crt = analyzeCRT(DATA.crt_frames, DATA.crt_release_t);
+    const fmt = (v, d = 0) => (v == null ? "–" : v.toFixed(d));
+
+    /* ---------- monitor ---------- */
+    const WINDOW = 6; // seconds visible, like a bedside monitor sweep
+    let playT = 0, playing = false, finished = false, speed = 1, lastTs = 0, raf = 0;
+    const endT = full.t[full.t.length - 1];
+
+    function drawMonitor() {
+      const c = el.canvas, dpr = window.devicePixelRatio || 1, W = c.clientWidth, H = c.clientHeight;
+      if (!W || !H) return;
+      if (c.width !== Math.round(W * dpr) || c.height !== Math.round(H * dpr)) { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); }
+      const g = c.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
+      const accent = cssVar("--accent") || "#8a2438", line = cssVar("--line") || "#ddd8ce", faint = cssVar("--faint") || "#8b9698";
+      g.strokeStyle = line; g.lineWidth = 1; g.beginPath();
+      for (let s = 0; s <= WINDOW; s++) { const x = (s / WINDOW) * W; g.moveTo(x, 0); g.lineTo(x, H); }
+      for (let k = 1; k < 4; k++) { const y = (k / 4) * H; g.moveTo(0, y); g.lineTo(W, y); }
+      g.stroke();
+      if (!playing && !finished && playT === 0) {
+        g.fillStyle = faint; g.font = "600 13px Inter, system-ui, sans-serif"; g.textAlign = "center";
+        g.fillText("Press play: 30 seconds of fingertip glow, 6 seconds on screen at a time.", W / 2, H / 2);
+        return;
+      }
+      const tNow = finished ? endT : playT, tStart = Math.max(full.t[0], tNow - WINDOW);
+      const bp = full.bp, t = full.t;
+      let lo = Infinity, hi = -Infinity; for (const v of bp) { if (v < lo) lo = v; if (v > hi) hi = v; }
+      const pad = 14, scale = (H - 2 * pad) / (hi - lo || 1), X = (tt) => ((tt - tStart) / WINDOW) * W, Y = (v) => H - pad - (v - lo) * scale;
+      g.strokeStyle = accent; g.lineWidth = 2; g.lineJoin = "round"; g.beginPath(); let started = false;
+      for (let i = 0; i < t.length; i++) {
+        if (t[i] < tStart || t[i] > tNow) continue;
+        const x = X(t[i]), y = Y(bp[i]);
+        if (!started) { g.moveTo(x, y); started = true; } else g.lineTo(x, y);
+      }
+      g.stroke();
+      g.fillStyle = accent;
+      for (const i of full.peaks) { if (t[i] < tStart || t[i] > tNow) continue; g.beginPath(); g.arc(X(t[i]), Y(bp[i]) - 6, 2.5, 0, Math.PI * 2); g.fill(); }
+      if (!finished) { g.strokeStyle = accent; g.lineWidth = 1; g.globalAlpha = 0.5; g.beginPath(); g.moveTo(X(tNow), 0); g.lineTo(X(tNow), H); g.stroke(); g.globalAlpha = 1; }
+    }
+
+    function showMetrics(res, live) {
+      el.hr.textContent = fmt(res.hr); el.rr.textContent = fmt(res.rr); el.hrv.textContent = fmt(res.rmssd);
+      el.pi.textContent = fmt(res.pi, 2); el.sqi.textContent = res.sqi == null ? "–" : `${Math.round(res.sqi * 100)}%`;
+      el.status.textContent = live
+        ? `${res.beats} clean beats so far; estimates settle as more of the recording arrives.`
+        : `${res.beats} clean beats in the recording; heart rate from the median beat interval, breathing from how the beats swell and shrink.`;
+    }
+
+    function partial(upTo) {
+      const sub = frames.filter((f) => f[0] - frameT0 <= upTo);
+      if (sub.length < 100) return;
+      const r = analyzePPG(sub);
+      if (r.hr != null) showMetrics(r, true);
+      else el.status.textContent = "Listening for a pulse in the glow.";
+    }
+
+    let nextPartial = 6;
+    function tick(ts) {
+      if (!playing) return;
+      const dt = ((ts - lastTs) / 1000) * speed; lastTs = ts;
+      playT = Math.min(endT, playT + dt);
+      el.clock.textContent = `${(playT + 2).toFixed(1)} s`;
+      if (playT >= nextPartial) { partial(playT + 2); nextPartial += 1.5; }
+      drawMonitor();
+      if (playT >= endT) finish(); else raf = requestAnimationFrame(tick);
+    }
+    function finish() {
+      playing = false; finished = true; cancelAnimationFrame(raf);
+      el.clock.textContent = `${(endT + 2).toFixed(1)} s`; el.play.textContent = "Play again";
+      showMetrics(full, false); drawMonitor(); updateBoard(true);
+    }
+    el.play.addEventListener("click", () => {
+      if (playing) { playing = false; cancelAnimationFrame(raf); el.play.textContent = "Resume"; return; }
+      if (finished) { finished = false; playT = 0; nextPartial = 6; ["hr", "rr", "hrv", "pi", "sqi"].forEach((k) => (el[k].textContent = "–")); }
+      if (reduceMotion) { finish(); return; }
+      playing = true; lastTs = performance.now(); el.play.textContent = "Pause";
+      el.status.textContent = "Camera settling, first two seconds are dropped."; raf = requestAnimationFrame(tick);
+    });
+    el.speed.addEventListener("click", () => { speed = speed === 1 ? 4 : 1; el.speed.setAttribute("aria-pressed", String(speed === 4)); el.speed.textContent = speed === 4 ? "1x speed" : "4x speed"; });
+    window.addEventListener("resize", drawMonitor);
+    new MutationObserver(() => { drawMonitor(); drawRefill(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+    /* ---------- refill plot ---------- */
+    function drawRefill() {
+      const svg = el.refill, NS = "http://www.w3.org/2000/svg";
+      while (svg.firstChild) svg.removeChild(svg.firstChild);
+      const accent = cssVar("--accent") || "#8a2438", line = cssVar("--line") || "#ddd8ce", faint = cssVar("--faint") || "#8b9698", ink = cssVar("--ink") || "#1d2528";
+      const mk = (tag, attrs, text) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; svg.appendChild(e); return e; };
+      if (!crt.t) return;
+      const anchor = crt.ok ? crt.tOn : crt.t[Math.floor(crt.t.length / 2)];
+      const tA = anchor - 3, tB = anchor + 6, W = 600, H = 180, padL = 40, padR = 16, padT = 18, padB = 26;
+      const idx = []; crt.t.forEach((v, i) => v >= tA && v <= tB && idx.push(i));
+      let lo = Infinity, hi = -Infinity; for (const i of idx) { if (crt.sm[i] < lo) lo = crt.sm[i]; if (crt.sm[i] > hi) hi = crt.sm[i]; }
+      lo -= 3; hi += 3;
+      const X = (tt) => padL + ((tt - tA) / (tB - tA)) * (W - padL - padR), Y = (v) => padT + (1 - (v - lo) / (hi - lo)) * (H - padT - padB);
+      for (let s = -3; s <= 6; s++) {
+        mk("line", { x1: X(anchor + s), y1: padT, x2: X(anchor + s), y2: H - padB, stroke: line, "stroke-width": 1 });
+        mk("text", { x: X(anchor + s), y: H - 8, "text-anchor": "middle", fill: faint, "font-size": 11, "font-weight": 600 }, s === 0 ? "release" : `${s > 0 ? "+" : ""}${s} s`);
+      }
+      mk("text", { x: 4, y: Y(hi - 3) + 4, fill: faint, "font-size": 11 }, Math.round(hi - 3));
+      mk("text", { x: 4, y: Y(lo + 3) + 4, fill: faint, "font-size": 11 }, Math.round(lo + 3));
+      mk("text", { x: 4, y: (padT + H - padB) / 2 + 4, fill: faint, "font-size": 11, "font-weight": 600 }, "red");
+      if (crt.ok) {
+        mk("line", { x1: padL, y1: Y(crt.y0), x2: W - padR, y2: Y(crt.y0), stroke: faint, "stroke-dasharray": "4 4" });
+        mk("line", { x1: padL, y1: Y(crt.yInf), x2: W - padR, y2: Y(crt.yInf), stroke: faint, "stroke-dasharray": "4 4" });
+        mk("text", { x: W - padR, y: Y(crt.y0) - 4, "text-anchor": "end", fill: faint, "font-size": 11 }, "pressed: blood squeezed out");
+        mk("text", { x: W - padR, y: Y(crt.yInf) + 13, "text-anchor": "end", fill: faint, "font-size": 11 }, "baseline: blood back");
+      }
+      let d = ""; for (const i of idx) d += (d ? " L" : "M") + X(crt.t[i]).toFixed(1) + "," + Y(crt.sm[i]).toFixed(1);
+      mk("path", { d, fill: "none", stroke: accent, "stroke-width": 2.2, "stroke-linejoin": "round" });
+      if (crt.ok && crt.t90 != null) {
+        const tx = crt.tOn + crt.t90;
+        mk("rect", { x: X(crt.tOn), y: padT, width: Math.max(1, X(tx) - X(crt.tOn)), height: H - padT - padB, fill: accent, opacity: 0.1 });
+        mk("circle", { cx: X(tx), cy: Y(crt.thr90), r: 4, fill: accent });
+        mk("text", { x: X(tx) + 7, y: Y(crt.thr90) + 4, fill: ink, "font-size": 12, "font-weight": 700 }, `90% back at ${crt.t90.toFixed(2)} s`);
+      }
+    }
+    if (crt.ok) {
+      el.crt.textContent = `${crt.t90.toFixed(2)} s`;
+      el.crtNote.textContent = `Pressed hard for four seconds, then relaxed without lifting. The red level rose by ${crt.amp.toFixed(0)} units while the capillaries were empty and fell back when blood returned. Under two seconds is normal; a nurse counting by eye would call this "under one".`;
+    } else {
+      el.crt.textContent = "–"; el.crtNote.textContent = `No refill reported: ${crt.reason}.`;
+    }
+    drawRefill();
+
+    /* ---------- nurse board ---------- */
+    let ready = false;
+    function updateBoard(unlock) {
+      if (unlock) {
+        ready = true;
+        el.hr2.disabled = el.rr2.disabled = false;
+        if (full.hr != null) el.hr2.value = full.hr;
+        if (full.rr != null) el.rr2.value = full.rr;
+      }
+      const flags = complaintFlags(el.complaint.value), pain = Number(el.pain.value);
+      el.painOut.textContent = String(pain);
+      el.flags.textContent = flags.length ? `Red flags spotted at check-in: ${flags.join(", ")}.` : "No red-flag words in the complaint.";
+      if (!ready) {
+        const sc = scorePatient({}, {}, flags, pain);
+        el.score.textContent = String(sc.score);
+        el.reasons.innerHTML = sc.reasons.length ? sc.reasons.map((r) => `<li>${r}</li>`).join("") : `<li class="vigil__muted">Play the recording to add the measured vitals.</li>`;
+        el.vitals.innerHTML = `<li class="vigil__muted">Vitals arrive after the finger check.</li>`;
+        el.row.classList.toggle("is-hot", sc.score >= 5);
+        el.row.classList.toggle("is-warm", sc.score >= 2 && sc.score < 5);
+        return;
+      }
+      const first = { hr: full.hr, rr: full.rr, crt: crt.ok ? Math.round(crt.t90 * 100) / 100 : null, pi: full.pi };
+      const hr2 = Number(el.hr2.value), rr2 = Number(el.rr2.value);
+      el.hr2Out.textContent = String(hr2); el.rr2Out.textContent = String(rr2);
+      const changed = hr2 !== full.hr || rr2 !== full.rr;
+      const last = changed ? { ...first, hr: hr2, rr: rr2 } : first;
+      const sc = scorePatient(first, last, flags, pain);
+      el.score.textContent = String(sc.score);
+      el.vitals.innerHTML = [
+        `HR <strong>${fmt(last.hr)}</strong>`, `RR <strong>${fmt(last.rr)}</strong>`, `HRV <strong>${fmt(full.rmssd)}</strong> ms`,
+        `PI <strong>${fmt(full.pi, 2)}</strong>%`, `refill <strong>${first.crt == null ? "–" : first.crt.toFixed(2)}</strong> s`,
+      ].map((v) => `<li>${v}</li>`).join("");
+      el.reasons.innerHTML = sc.reasons.length ? sc.reasons.map((r) => `<li>${r}</li>`).join("") : `<li class="vigil__muted">Nothing to flag. Re-check due in 15 minutes.</li>`;
+      el.row.classList.toggle("is-hot", sc.score >= 5);
+      el.row.classList.toggle("is-warm", sc.score >= 2 && sc.score < 5);
+    }
+    el.complaint.addEventListener("input", () => updateBoard(false));
+    el.pain.addEventListener("input", () => updateBoard(false));
+    el.hr2.addEventListener("input", () => updateBoard(false));
+    el.rr2.addEventListener("input", () => updateBoard(false));
+    root.querySelectorAll("[data-vigil-example]").forEach((b) => b.addEventListener("click", () => { el.complaint.value = b.dataset.vigilExample; updateBoard(false); }));
+    updateBoard(false);
+    drawMonitor();
+  })();
+</script>

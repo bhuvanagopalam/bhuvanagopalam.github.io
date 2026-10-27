@@ -3725,3 +3725,374 @@ main {
     transform: none;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Vigil demo: monitor playback, refill trace, nurse board
+   --------------------------------------------------------------------------- */
+
+.vigil__panel {
+  margin-top: 24px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 18px 20px 20px;
+}
+
+.vigil__panel-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 18px;
+  margin-bottom: 14px;
+}
+
+.vigil__panel-head h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1.02rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.vigil__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.vigil__btn {
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  background: var(--accent);
+  padding: 8px 16px;
+  color: #fff;
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 750;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+
+.vigil__btn:hover,
+.vigil__btn:focus-visible {
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
+}
+
+.vigil__btn--ghost {
+  background: transparent;
+  color: var(--accent-strong);
+  border-color: var(--line-strong);
+}
+
+.vigil__btn--ghost:hover,
+.vigil__btn--ghost:focus-visible,
+.vigil__btn--ghost[aria-pressed="true"] {
+  background: rgba(138, 36, 56, 0.08);
+  border-color: var(--accent);
+  color: var(--accent-strong);
+}
+
+.vigil__clock {
+  min-width: 52px;
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.vigil__monitor {
+  display: block;
+  width: 100%;
+  height: 170px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-strong);
+}
+
+.vigil__status {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.vigil__metrics {
+  margin-top: 16px;
+}
+
+.vigil__metrics li {
+  min-width: 118px;
+}
+
+.vigil__crt {
+  color: var(--accent);
+  font-size: 1.5rem;
+  font-weight: 850;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.vigil__refill {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-strong);
+}
+
+.vigil__refill text {
+  font-family: inherit;
+}
+
+.vigil__lead {
+  max-width: 680px;
+  margin: 0 0 18px;
+  color: var(--muted);
+  font-size: 0.94rem;
+  line-height: 1.6;
+}
+
+.vigil__board {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.vigil__inputs {
+  display: grid;
+  gap: 14px;
+}
+
+.vigil__field {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 650;
+}
+
+.vigil__field strong {
+  color: var(--accent-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+.vigil__field input[type="text"] {
+  width: 100%;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--surface-strong);
+  padding: 10px 12px;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.95rem;
+}
+
+.vigil__field input[type="text"]:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(138, 36, 56, 0.15);
+}
+
+.vigil__field input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.vigil__field input[type="range"]:disabled {
+  opacity: 0.45;
+}
+
+.vigil__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.vigil__chip {
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: transparent;
+  padding: 5px 11px;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 650;
+  cursor: pointer;
+  transition: border-color 0.18s ease, color 0.18s ease, background 0.18s ease;
+}
+
+.vigil__chip:hover,
+.vigil__chip:focus-visible {
+  border-color: var(--accent);
+  background: rgba(138, 36, 56, 0.07);
+  color: var(--accent-strong);
+}
+
+.vigil__recheck {
+  display: grid;
+  gap: 12px;
+  margin: 4px 0 0;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius);
+  padding: 12px 14px 14px;
+}
+
+.vigil__recheck legend {
+  padding: 0 6px;
+  color: var(--faint);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.vigil__row {
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--positive);
+  border-radius: var(--radius);
+  background: var(--surface-strong);
+  padding: 14px 16px 16px;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.vigil__row.is-warm {
+  border-left-color: var(--gold);
+}
+
+.vigil__row.is-hot {
+  border-left-color: var(--accent);
+  background: rgba(138, 36, 56, 0.05);
+}
+
+.vigil__row-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.vigil__row-name {
+  color: var(--ink);
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.vigil__score {
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 650;
+}
+
+.vigil__score strong {
+  color: var(--ink);
+  font-size: 1.7rem;
+  font-weight: 850;
+  font-variant-numeric: tabular-nums;
+  margin-right: 4px;
+}
+
+.vigil__vitals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 650;
+}
+
+.vigil__vitals strong {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.vigil__reasons {
+  display: grid;
+  gap: 5px;
+  margin: 12px 0 0;
+  padding: 12px 0 0;
+  border-top: 1px solid var(--line);
+  list-style: none;
+  color: var(--ink);
+  font-size: 0.88rem;
+  font-weight: 650;
+}
+
+.vigil__reasons li::before {
+  content: "+ ";
+  color: var(--accent);
+}
+
+.vigil__reasons li.vigil__muted::before,
+.vigil__vitals li.vigil__muted::before {
+  content: none;
+}
+
+.vigil__muted {
+  color: var(--faint);
+  font-weight: 500;
+}
+
+.vigil__flags {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+:root[data-theme="dark"] .vigil__panel,
+:root[data-theme="dark"] .vigil__monitor,
+:root[data-theme="dark"] .vigil__refill,
+:root[data-theme="dark"] .vigil__row,
+:root[data-theme="dark"] .vigil__field input[type="text"],
+:root[data-theme="dark"] .vigil__chip,
+:root[data-theme="dark"] .vigil__recheck,
+:root[data-theme="dark"] .vigil__btn--ghost {
+  border-color: rgba(67, 78, 71, 0.7);
+}
+
+:root[data-theme="dark"] .vigil__btn {
+  color: #0d1412;
+}
+
+:root[data-theme="dark"] .vigil__btn--ghost {
+  color: var(--accent-strong);
+}
+
+:root[data-theme="dark"] .vigil__btn--ghost:hover,
+:root[data-theme="dark"] .vigil__btn--ghost:focus-visible,
+:root[data-theme="dark"] .vigil__btn--ghost[aria-pressed="true"],
+:root[data-theme="dark"] .vigil__chip:hover,
+:root[data-theme="dark"] .vigil__chip:focus-visible {
+  border-color: rgba(201, 115, 127, 0.5);
+  background: rgba(201, 115, 127, 0.1);
+}
+
+:root[data-theme="dark"] .vigil__field input[type="text"]:focus-visible {
+  box-shadow: 0 0 0 3px rgba(201, 115, 127, 0.2);
+}
+
+:root[data-theme="dark"] .vigil__row.is-hot {
+  background: rgba(201, 115, 127, 0.08);
+}
+
+@media (max-width: 760px) {
+  .vigil__board {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .vigil__panel {
+    padding: 16px 14px 18px;
+  }
+
+  .vigil__monitor {
+    height: 140px;
+  }
+}

@@ -11,10 +11,27 @@ export type Project = {
   // When set, the card title links through to a full write-up page at
   // /projects/<slug>/ and that page renders the named interactive.
   slug?: string;
-  interactive?: "fracture-compare" | "sqvqa-pipeline" | "leakage" | "matcher" | "confusion" | "stream-pipeline";
+  interactive?: "vigil" | "fracture-compare" | "sqvqa-pipeline" | "leakage" | "matcher" | "confusion" | "stream-pipeline";
 };
 
 export const projects: Project[] = [
+  {
+    title: "Vigil: Waiting-Room Vital Signs from a Phone Camera",
+    status: "Active",
+    summary:
+      "Turned the phones already in an ER waiting room into a continuous monitor: pulse, breathing, HRV, perfusion and capillary refill from a fingertip on the camera, ranked on a nurse's board with reasons. Built in 24 hours at Social Hack 2026 (UMN).",
+    highlights: [
+      "Patients scan a QR to a plain web page, no app: 20 seconds with a fingertip over the flash gives a pulse-oximeter-grade PPG waveform, and a 10-second press-and-release gives capillary refill timed to a single frame.",
+      "Wrote the signal pipeline in NumPy: moving-average detrend, 0.7 to 3 Hz band-pass, a spectral heart-rate estimate that guides beat detection past the dicrotic notch, RMSSD heart-rate variability, perfusion index, and breathing rate from amplitude, interval and baseline modulation of the pulse.",
+      "Built the FastAPI server and nurse board: everyone in the room ranked by a transparent NEWS2-style score with every point explained, trend since arrival, re-checks every 15 minutes, and a Find button that makes the patient's phone glow.",
+      "Trained a logistic deterioration model on 3,964 PhysioNet/CinC 2019 ICU patients (151,000 hourly rows): test AUROC 0.67 against 0.64 for the NEWS bands alone, shown on the board as a risk percentile with its reasons.",
+      "Added a room camera that counts breathing per chair from chest motion and flags apnea, tied to each patient by chair number so it feeds their score between finger checks.",
+    ],
+    tags: ["Python", "NumPy", "FastAPI", "Signal Processing", "PPG", "Logistic Regression", "PhysioNet", "Camera API"],
+    links: [{ label: "GitHub", href: "https://github.com/bhuvanagopalam/Vigil" }],
+    slug: "vigil",
+    interactive: "vigil",
+  },
   {
     title: "Bone Fracture Detection in Musculoskeletal Radiographs",
     status: "Active",

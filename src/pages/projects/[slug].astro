@@ -4,6 +4,7 @@ import FractureCompare from "../../components/interactive/FractureCompare.astro"
 import LeakageDemo from "../../components/interactive/LeakageDemo.astro";
 import MatcherDemo from "../../components/interactive/MatcherDemo.astro";
 import StagePipeline from "../../components/interactive/StagePipeline.astro";
+import VigilDemo from "../../components/interactive/VigilDemo.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { projects } from "../../data/projects";
 import { profile } from "../../data/profile";
@@ -21,6 +22,7 @@ const { project } = Astro.props;
 
 // Heading shown above the interactive block, per project.
 const interactiveTitles = {
+  vigil: "A real 30-second reading, analysed in your browser",
   "fracture-compare": "Where the model agrees, and where it does not",
   "sqvqa-pipeline": "Inside SQVQA",
   leakage: "The bug that made the model look good",
@@ -131,6 +133,7 @@ const streamStages = [
             <span aria-hidden="true" />
           </div>
 
+          {project.interactive === "vigil" && <VigilDemo />}
           {project.interactive === "fracture-compare" && <FractureCompare />}
           {project.interactive === "leakage" && <LeakageDemo />}
           {project.interactive === "matcher" && <MatcherDemo />}
