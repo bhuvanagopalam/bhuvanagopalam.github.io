@@ -1,7 +1,8 @@
 ---
 // Illustrates why the original train/test split inflated scores on this
 // project. The rows are an illustration of the split strategy, not a sample of
-// the real dataset - the only measured figure quoted is the corrected 0.85.
+// the real dataset - the measured figures quoted (0.87 random, 0.85 grouped) come from
+// results/metrics.json in the Airline-Delay-Risk repository.
 ---
 
 <div class="interactive">
@@ -36,8 +37,10 @@
 
   <p class="interactive__note">
     Regrouping the split so an airport-carrier pair lands entirely on one side removed the
-    leak. The honest number after that correction was <strong>0.85 ROC-AUC</strong> with
-    LightGBM - lower than the leaky version had reported, and the one worth quoting.
+    leak: 2,528 of the 2,630 pairs had been straddling it. The random split reads 0.87 ROC-AUC
+    for LightGBM; on unseen pairs the honest number is <strong>0.85 ROC-AUC</strong>, and that is
+    the one worth quoting. The repository also drops the twelve delay-cause columns, which are a
+    breakdown of the target itself and leak it outright.
   </p>
 </div>
 
