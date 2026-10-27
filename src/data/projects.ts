@@ -89,9 +89,9 @@ export const projects: Project[] = [
     summary:
       "Built a semantic matching system to connect patient drug reviews with standardized drug data for structured analysis.",
     highlights: [
-      "Linked 3,100 patient drug reviews with standardized drug records using semantic similarity.",
-      "Improved match accuracy from 8% to 75% by using embedding-based similarity search.",
-      "Processed 1,500 drugs and handled messy inputs such as brand names, typos, and informal patient-written text.",
+      "Linked 3,107 patient drug reviews to a standardized table of 1,507 generic drugs; an exact name join reaches only 5% of the reviews, because patients write Xanax, Lyrica and Vyvanse where the table says alprazolam, pregabalin and lisdexamfetamine.",
+      "Built a three-stage soft foreign key: an LLM proposes the generic name, MiniLM embeddings stored in Pinecone find candidates above 0.5 cosine similarity, and the LLM validates the final pick, with an explicit fallback when the drug is missing from the table.",
+      "Handled messy inputs such as brand names, typos and informal patient-written text; ambiguous matches in the 0.50 to 0.60 similarity band were the reason for the validation stage.",
       "Designed a PostgreSQL database to combine structured drug information with patient reviews.",
       "Enabled analysis of top side effects per drug and brand-versus-generic comparisons.",
     ],

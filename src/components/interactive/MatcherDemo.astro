@@ -7,7 +7,7 @@
 <div class="interactive">
   <p class="interactive__intro">
     Patients do not write drug names the way a drug database stores them. They use brand
-    names, abbreviations, and typos. Exact string matching resolved about 8% of the reviews.
+    names, abbreviations, and typos. An exact string join links only 5% of the reviews.
     Try one of these - or type your own - and watch exact matching fail where similarity
     matching succeeds.
   </p>
@@ -48,8 +48,9 @@
 
   <p class="interactive__note">
     The production system matched on sentence embeddings rather than character overlap, over
-    a catalogue of 1,500 drugs, which is what carried accuracy from
-    <strong>8% to 75%</strong> across 3,100 reviews. The comparison above runs a simpler
+    a catalogue of 1,507 generic drugs, with an LLM proposing and then validating each
+    match: exact joins reach <strong>5%</strong> of the 3,107 reviews, and a mapping is kept only
+    above 0.5 cosine similarity. The comparison above runs a simpler
     character-similarity measure in your browser so the failure mode is visible without
     shipping a model to this page.
   </p>
