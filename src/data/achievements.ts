@@ -67,14 +67,30 @@ export const achievements: Achievement[] = [
     date: "June 2025",
     kind: "Award",
     summary:
-      "Awarded the Silver Medal for the second overall rank in the Data Science department across the four-year B.Tech programme.",
+      "Awarded the Silver Medal and a Certificate of Merit for Outstanding Academic Excellence for the second position in B.Tech Computer Science and Engineering (Data Science), academic years 2021 to 2025, with a CGPA of 8.84.",
+    photos: [
+      {
+        src: "/images/achievements/silver-medal-2025.jpg",
+        alt: "Silver medal on a yellow ribbon beside the Certificate of Merit from Mahatma Gandhi Institute of Technology for second position in B.Tech Computer Science and Engineering (Data Science), 2021 to 2025",
+        caption: "Silver Medal and Certificate of Merit, 2025.",
+        focus: "45% 50%",
+      },
+    ],
   },
   {
     title: "First Rank, Data Science Department",
     issuer: "Mahatma Gandhi Institute of Technology",
-    date: "2022",
+    date: "Academic year 2021-22",
     kind: "Rank",
     summary:
-      "Ranked first in the Data Science department by GPA in the first year of the B.Tech programme.",
+      "Ranked first in the Data Science department by GPA in the first year of the B.Tech programme. Recognised with a Certificate of Merit and trophy for Outstanding Academic Excellence, presented by the MGIT Women Development Committee on International Women's Day 2023.",
+    photos: [
+      {
+        src: "/images/achievements/first-rank-2022.jpg",
+        alt: "Certificate of Merit from Mahatma Gandhi Institute of Technology for first position in B.Tech first year, 2021-22, next to the International Women's Day award trophy",
+        caption: "Certificate of Merit and trophy, International Women's Day 2023.",
+        focus: "38% 50%",
+      },
+    ],
   },
 ];
