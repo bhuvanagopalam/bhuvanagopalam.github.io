@@ -300,9 +300,9 @@ main {
 }
 
 .hero {
-  /* Extra headroom so the gopher peeking over the portrait card clears the
-     sticky header instead of sliding underneath it. */
-  padding: 92px 0 44px;
+  /* Extra headroom so Goldy, fully up, clears the sticky header instead of
+     sliding underneath it. */
+  padding: 124px 0 44px;
 }
 
 .hero__grid {
@@ -446,18 +446,42 @@ main {
   gap: 14px;
 }
 
-/* The gopher sits behind the portrait, so only head and paws clear the top edge. */
+/* Goldy sits on the top edge of the portrait card, always fully visible, and
+   slowly rolls along it: right corner to left corner, a pause, and back.
+   One full turn per crossing, so he is upright during both pauses. */
 .gopher {
   position: absolute;
-  top: -82px;
-  right: 24px;
+  top: -100px;
+  left: calc(100% - 122px);
   z-index: 0;
-  width: 118px;
+  width: 104px;
   pointer-events: none;
-  transition: transform 0.35s cubic-bezier(0.34, 1.4, 0.64, 1);
+  animation: gopher-roll 24s ease-in-out infinite;
 }
 
-.gopher svg {
+.gopher img {
+  transform-origin: 50% 50%;
+}
+
+@keyframes gopher-roll {
+  0%,
+  10%,
+  100% {
+    left: calc(100% - 122px);
+    transform: rotate(0deg);
+  }
+  45%,
+  58% {
+    left: 18px;
+    transform: rotate(-360deg);
+  }
+  93% {
+    left: calc(100% - 122px);
+    transform: rotate(0deg);
+  }
+}
+
+.gopher img {
   display: block;
   width: 100%;
   height: auto;
@@ -465,7 +489,7 @@ main {
 }
 
 .hero__card:hover .gopher {
-  transform: translateY(-12px) rotate(-3deg);
+  animation-play-state: paused;
 }
 
 .portrait-card {
@@ -476,7 +500,11 @@ main {
   border: 1px solid rgba(199, 192, 181, 0.82);
   border-radius: 16px;
   background: var(--surface);
-  box-shadow: 0 16px 42px rgba(35, 38, 35, 0.12);
+  /* A soft, even halo on every side plus the original drop shadow underneath. */
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.6),
+    0 0 34px rgba(35, 38, 35, 0.16),
+    0 16px 42px rgba(35, 38, 35, 0.12);
 }
 
 .portrait-card__image {
@@ -3606,9 +3634,27 @@ main {
   }
 
   .gopher {
-    width: 92px;
-    top: -64px;
-    right: 12px;
+    width: 80px;
+    top: -76px;
+    left: calc(100% - 92px);
+  }
+
+  @keyframes gopher-roll {
+    0%,
+    10%,
+    100% {
+      left: calc(100% - 92px);
+      transform: rotate(0deg);
+    }
+    45%,
+    58% {
+      left: 12px;
+      transform: rotate(-360deg);
+    }
+    93% {
+      left: calc(100% - 92px);
+      transform: rotate(0deg);
+    }
   }
 
   /* The train/test board stays side by side even on a phone - seeing both
@@ -3729,7 +3775,7 @@ main {
 @media (prefers-reduced-motion: reduce) {
   .gopher,
   .hero__card:hover .gopher {
-    transition: none;
+    animation: none;
     transform: none;
   }
 
@@ -4423,4 +4469,12 @@ main {
     min-height: auto;
     aspect-ratio: 16 / 9;
   }
+}
+
+/* Placed last so it beats the shared dark-mode card rule above. */
+:root[data-theme="dark"] .portrait-card {
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    0 0 36px rgba(255, 255, 255, 0.08),
+    0 18px 52px rgba(0, 0, 0, 0.3);
 }
