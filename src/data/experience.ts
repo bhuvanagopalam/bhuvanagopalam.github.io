@@ -21,13 +21,14 @@ export const experience: ExperienceItem[] = [
     start: "Summer 2026",
     end: "Present",
     summary:
-      "Building data pipelines and interpretable machine learning models over large multi-source administrative datasets for student outcome prediction.",
+      "Studying which non-core elective courses are linked to stronger student outcomes, and for which students, on a 20-year longitudinal district dataset inside a secure data enclave.",
     details: [
-      "Designed and implemented data processing pipelines in Python to ingest, clean, and integrate large multi-source administrative datasets (attendance, grades, health, and discipline records) for downstream analysis.",
-      "Engineered reusable ETL and feature-construction modules handling missing data, schema normalization, and student-level outcome definitions, improving data quality and pipeline reliability.",
-      "Built and benchmarked interpretable machine learning models using scalable, testable code to identify risk factors and compare modeling approaches for outcome prediction.",
+      "Driving a new study of non-core elective courses such as art and music to find which electives are linked to stronger student outcomes, and which types of students benefit more or less from each.",
+      "Designing an elective recommender system that suggests classes to each student based on their profile and the results of similar students. Scoped the research questions and data sources with the faculty advisor.",
+      "Built data cleaning and ETL pipelines in R and Python for a 20-year longitudinal dataset of district records (attendance, grades, demographics), resolving issues such as mismatched ID columns and missing year fields.",
+      "Developed interpretable predictive models to flag early student risk factors, working independently with incomplete, ambiguous data in a secure data enclave under strict privacy rules.",
     ],
-    tags: ["Python", "ETL", "Pandas", "Feature Engineering", "Interpretable ML"],
+    tags: ["Python", "R", "ETL", "Longitudinal Data", "Recommender Systems", "Interpretable ML"],
   },
   {
     title: "Undergraduate Research Assistant - Realtime Violence Detection",
