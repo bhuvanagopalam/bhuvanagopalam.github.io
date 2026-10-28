@@ -45,6 +45,8 @@ export const navigation = [
   { label: "Skills", href: "/#skills" },
   { label: "Experience", href: "/#experience" },
   { label: "Projects", href: "/#projects" },
+  { label: "Conferences", href: "/#conferences" },
+  { label: "Achievements", href: "/#achievements" },
   { label: "Contact", href: "/#contact" },
 ];
 

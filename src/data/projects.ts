@@ -19,7 +19,7 @@ export const projects: Project[] = [
     title: "Vigil: Waiting-Room Vital Signs from a Phone Camera",
     status: "Active",
     summary:
-      "Turned the phones already in an ER waiting room into a continuous monitor: pulse, breathing, HRV, perfusion and capillary refill from a fingertip on the camera, ranked on a nurse's board with reasons. Built in 24 hours at Social Hack 2026 (UMN).",
+      "Turned the phones already in an ER waiting room into a continuous monitor: pulse, breathing, HRV, perfusion and capillary refill from a fingertip on the camera, ranked on a nurse's board with reasons. Built in 24 hours at Social Hack 2026 (UMN), where it took second place in the Vision track.",
     highlights: [
       "Patients scan a QR to a plain web page, no app: 20 seconds with a fingertip over the flash gives a pulse-oximeter-grade PPG waveform, and a 10-second press-and-release gives capillary refill timed to a single frame.",
       "Wrote the signal pipeline in NumPy: moving-average detrend, 0.7 to 3 Hz band-pass, a spectral heart-rate estimate that guides beat detection past the dicrotic notch, RMSSD heart-rate variability, perfusion index, and breathing rate from amplitude, interval and baseline modulation of the pulse.",
