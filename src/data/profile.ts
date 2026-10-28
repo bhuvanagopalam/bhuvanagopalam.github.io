@@ -20,7 +20,7 @@ export const profile = {
     "I have research experience in real-time violence detection, medical imaging, explainable AI, and trustworthy machine learning. I enjoy building AI systems that are accurate, interpretable, and useful for real-world applications.",
   ],
   availability:
-    "Open to machine learning, applied AI, data science, computer vision, NLP, and backend AI roles.",
+    "Open to machine learning engineer, data scientist, applied AI, computer vision, and data analytics roles.",
   links: {
     email: "mailto:gopalambhuvana@gmail.com",
     github: "https://github.com/bhuvanagopalam",
