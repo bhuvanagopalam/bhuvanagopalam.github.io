@@ -87,6 +87,36 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* WhatsApp-style doodle wallpaper: a tiled SVG of tech sketches, used as a
+   mask over a flat ink colour so it follows the theme. Fixed behind every
+   section; cards and surfaces sit on top of it. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-color: var(--ink);
+  opacity: 0.075;
+  -webkit-mask-image: url("/images/tech-doodles.svg");
+  mask-image: url("/images/tech-doodles.svg");
+  -webkit-mask-size: 420px 420px;
+  mask-size: 420px 420px;
+  -webkit-mask-repeat: repeat;
+  mask-repeat: repeat;
+}
+
+:root[data-theme="dark"] body::before {
+  opacity: 0.1;
+}
+
+@media (max-width: 760px) {
+  body::before {
+    -webkit-mask-size: 300px 300px;
+    mask-size: 300px 300px;
+  }
+}
+
 a {
   color: inherit;
   text-decoration: none;
