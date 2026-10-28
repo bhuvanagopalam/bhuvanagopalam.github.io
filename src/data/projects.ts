@@ -11,7 +11,7 @@ export type Project = {
   // When set, the card title links through to a full write-up page at
   // /projects/<slug>/ and that page renders the named interactive.
   slug?: string;
-  interactive?: "vigil" | "fracture-compare" | "sqvqa-pipeline" | "leakage" | "matcher" | "confusion" | "stream-pipeline";
+  interactive?: "vigil" | "fracture-compare" | "sqvqa-pipeline" | "leakage" | "matcher" | "confusion" | "stream-pipeline" | "shelf-pipeline";
 };
 
 export const projects: Project[] = [
@@ -31,6 +31,24 @@ export const projects: Project[] = [
     links: [{ label: "GitHub", href: "https://github.com/bhuvanagopalam/Vigil" }],
     slug: "vigil",
     interactive: "vigil",
+  },
+  {
+    title: "The Shelf Is Lying: Inventory Availability Analysis",
+    status: "Active",
+    summary:
+      "A retail analytics project that finds products recorded as in stock but unlikely to be on the shelf, explains the likely cause such as unprocessed returns or clearance moves, and recommends which store actions are worth the staff time. Built on a simulated 24-store seasonal collection so every result can be checked against known ground truth.",
+    highlights: [
+      "Simulated a 16-week seasonal collection across 24 stores and 120 products, with daily sales, returns, markdowns, online pickup orders and store audits. Recorded stock and the true location of each unit were tracked separately, which gives a ground truth for testing.",
+      "Built two ways to flag at-risk inventory: a simple rule-based score from common warning signs, and an interpretable logistic regression model that uses only the information a store system already has.",
+      "Tested both on later weeks the model had not seen. Among the 20% of records flagged as highest risk, 86.7% were real availability problems, compared with 80.7% for the rule-based score.",
+      "Compared each store's clearance mix with similar stores to separate normal local variation from signs of an operational problem, such as heavy returns or aging stock.",
+      "Converted risk scores into a weekly action list for store teams, ranked by expected margin recovered per hour of labor. Under the same labor budget this recovered about $22.1K, compared with $21.4K for checking the largest stock counts first and $9.1K for responding to cancellations first.",
+      "Delivered a four-view Streamlit dashboard, a one-page leadership summary with a pilot plan, and unit tests for the business rules. All data is simulated and does not represent any real retailer.",
+    ],
+    tags: ["Python", "Pandas", "NumPy", "scikit-learn", "Logistic Regression", "Streamlit", "Plotly", "Retail Analytics", "Decision Analysis"],
+    links: [{ label: "GitHub", href: "https://github.com/bhuvanagopalam/the-shelf-is-lying" }],
+    slug: "the-shelf-is-lying",
+    interactive: "shelf-pipeline",
   },
   {
     title: "Bone Fracture Detection in Musculoskeletal Radiographs",

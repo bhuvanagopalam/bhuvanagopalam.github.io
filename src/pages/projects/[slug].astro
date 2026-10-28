@@ -29,6 +29,7 @@ const interactiveTitles = {
   matcher: "Why exact matching only got to 5%",
   confusion: "What perfect recall actually costs",
   "stream-pipeline": "How a frame becomes an alert",
+  "shelf-pipeline": "How a stock record becomes a store action",
 };
 
 const sqvqaStages = [
@@ -79,6 +80,34 @@ const streamStages = [
     label: "Store and surface",
     model: "InfluxDB + Streamlit",
     body: "Detections are written to a time-series store and surfaced on a live dashboard, so operators see events as they land rather than reading logs after the fact.",
+  },
+];
+
+const shelfStages = [
+  {
+    label: "Simulate",
+    model: "NumPy + Pandas",
+    body: "A seasonal collection across 24 stores and 120 products over 16 weeks, with daily sales, returns, markdowns, pickup orders and audits. Recorded stock and actual location are kept separate, so the truth is known.",
+  },
+  {
+    label: "Observe",
+    model: "Feature table",
+    body: "Only information a store system already has: quantity on hand, days since the last sale, recent returns, pickup cancellations, time since the last count, stock adjustments, markdown depth and sales at similar stores.",
+  },
+  {
+    label: "Score",
+    model: "Rules + logistic regression",
+    body: "A rule-based score and an interpretable model estimate the chance that recorded stock is not actually available. Both are tested on later weeks and measured on the share of records a team could realistically check.",
+  },
+  {
+    label: "Explain",
+    model: "Clearance comparison",
+    body: "Each store's clearance mix is compared with similar stores to separate normal local differences from warning signs such as heavy returns or aging stock.",
+  },
+  {
+    label: "Act",
+    model: "Expected-value ranking",
+    body: "Risk, likely location, remaining demand and margin are combined into a weekly list ranked by expected margin recovered per hour of labor. Taking no action is an allowed outcome.",
   },
 ];
 ---
@@ -159,6 +188,15 @@ const streamStages = [
               stages={streamStages}
               resultLead="Sub-second"
               result="end-to-end latency across multiple concurrent streams"
+            />
+          )}
+
+          {project.interactive === "shelf-pipeline" && (
+            <StagePipeline
+              intro="A system can show the right quantity and still be wrong about whether a customer can find the item. This walkthrough follows one inventory record from the count on file to the action recommended for the store team."
+              stages={shelfStages}
+              resultLead="86.7%"
+              result="of the highest-risk records in the test period were real availability problems, compared with 80.7% for the rule-based score"
             />
           )}
         </div>
