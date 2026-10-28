@@ -40,13 +40,13 @@ export const conferences: Conference[] = [
     location: "McNamara Alumni Center, Minneapolis, MN",
     date: "October 26, 2026",
     summary:
-      "A full day at the Midwest's largest gathering of women in AI and data science, one day after the hackathon. I walked in running on very little sleep and walked out with a notebook full of ideas and a long list of people I want to learn from. The talks went from how AI quietly fails the people it was never built for to the exact engineering of shrinking a language model down to one domain, and every one of them was given by someone I would happily work for.",
+      "Attended the Midwest's largest conference on women in AI and data science, hosted by the University of Minnesota AI Hub. The programme covered responsible AI, domain-specialised language models, causal measurement and health data, with a keynote by Meredith Broussard of NYU.",
     details: [
-      "Keynote: Dangerously Biased AI, by Meredith Broussard (NYU), on using empathy to anticipate where AI goes wrong before it ships.",
-      "Fine-Tuning and Distillation for Domain-Specialized Language Models, by Sona Maniyan (Thrivent).",
-      "From Prediction to Action: Using Meta Learners to Measure Incremental Impact, by Gowthami Peri (Target).",
-      "The Women's Health Data Gap: What Menopause Reveals About AI, by Robin Austin (UMN School of Nursing).",
-      "Plus sessions by Jen Simon (Verus), Jamie Johnson (CNA Insurance) and many other speakers, and lunch-table conversations with women across the field that I am still thinking about.",
+      "Keynote: Dangerously Biased AI, Meredith Broussard (NYU), on anticipating AI risks before deployment.",
+      "Fine-Tuning and Distillation for Domain-Specialized Language Models, Sona Maniyan (Thrivent).",
+      "From Prediction to Action: Using Meta Learners to Measure Incremental Impact, Gowthami Peri (Target).",
+      "The Women's Health Data Gap: What Menopause Reveals About AI, Robin Austin (UMN School of Nursing).",
+      "Further sessions by Jen Simon (Verus), Jamie Johnson (CNA Insurance) and other industry and academic speakers, and networking with practitioners across the field.",
     ],
     photos: [
       {
